@@ -1,6 +1,7 @@
 /ignore
 /obj
 /bin
+/**/.pzeditor
 
 *.dll
 *.exe
