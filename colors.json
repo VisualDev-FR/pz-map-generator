@@ -1,0 +1,20 @@
+{
+    "Dark Grass": "90 100 35",
+    "Medium Grass": "117 117 47",
+    "Light Grass": "145 135 60",
+    "Sand": "210 200 160",
+    "Light Asphalt": "165 160 140",
+    "Dark Asphalt (main roads)": "100 100 100",
+    "Medium Asphalt": "120 120 120",
+    "Gravel Dirt": "140 70 15",
+    "Dirt": "120 70 20",
+    "Dark Pothole": "110 100 100",
+    "Light Pothole": "130 120 120",
+    "Water": "0 138 255",
+    "Dense Forest": "255 0 0",
+    "Dense Trees + Dark grass": "127 0 0",
+    "Trees + grass": "64 0 0",
+    "Mainly grass, some trees": "0 128 0",
+    "Light long grass": "0 255 0",
+    "None": "0 0 0"
+}
