@@ -33,4 +33,14 @@ public class Layer
             new XElement("data", new XAttribute("encoding", "csv"), csvDatas)
         );
     }
+
+    public void SetGID(int x, int y, int value)
+    {
+        Datas[y * Width + x] = value;
+    }
+
+    public int GetGID(int x, int y)
+    {
+        return Datas[y * Width + x];
+    }
 }

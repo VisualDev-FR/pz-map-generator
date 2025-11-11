@@ -1,3 +1,4 @@
+using System.IO;
 using System.Xml.Linq;
 
 public class TileSet
@@ -9,6 +10,8 @@ public class TileSet
         public int Width { get; set; }
 
         public int Height { get; set; }
+
+        public string AbsolutePath => Path.GetFullPath($"{Constants.TilesPath}/{Path.GetFileName(Source)}");
 
         public static Image Parse(XElement node)
         {
@@ -61,5 +64,10 @@ public class TileSet
             new XAttribute("tileheight", Tileheight),
             ImageSource.ToXml()
         );
+    }
+
+    public override string ToString()
+    {
+        return $"Tileset: '{Name}', firstgid: {Firstgid}, source: '{ImageSource.AbsolutePath}'";
     }
 }

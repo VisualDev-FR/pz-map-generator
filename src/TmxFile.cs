@@ -24,6 +24,8 @@ public class TmxFile()
 
     private readonly Dictionary<string, ObjectGroup> ObjectGroups = new();
 
+    private int[] gids;
+
     private XElement MapNode;
 
     private XElement BmpSettings;
@@ -38,6 +40,7 @@ public class TmxFile()
         tmxFile.ReadLayers(document);
         tmxFile.ReadObjectGroups(document);
         tmxFile.BmpSettings = document.Descendants("bmp-settings").First();
+        tmxFile.gids = tmxFile.TileSets.Keys.OrderBy(k => k).ToArray();
 
         return tmxFile;
     }
@@ -114,4 +117,53 @@ public class TmxFile()
         document.Save(path);
     }
 
+    public void Clear(int x0, int y0, int x1, int y1)
+    {
+        const int replacer = 10679;
+
+        for (int x = x0; x <= x1 + 1; x++)
+        {
+            for (int y = y0; y <= y1 + 1; y++)
+            {
+                foreach (var layer in Layers.Values)
+                {
+                    layer.SetGID(x, y, replacer);
+                }
+            }
+        }
+    }
+
+    public int GetGID(string layerName, int x, int y)
+    {
+        return Layers[layerName].GetGID(x, y);
+    }
+
+    public TileSet FindTileSet(string layerName, int x, int y)
+    {
+        var gid = GetGID(layerName, x, y);
+
+        return FindTileSet(gid);
+    }
+
+    public TileSet FindTileSet(int gid)
+    {
+        var gids = this.gids.ToArray();
+
+        while (gids.Length > 1)
+        {
+            var index = gids.Length / 2;
+            var currentValue = gids[index];
+
+            if (currentValue < gid)
+            {
+                gids = gids[index..gids.Length];
+            }
+            else
+            {
+                gids = gids[0..index];
+            }
+        }
+
+        return TileSets[gids[0]];
+    }
 }
