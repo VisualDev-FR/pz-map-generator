@@ -99,7 +99,7 @@ public class LotheaderFile
 
         for (int i = 0; i < tilesCount; i++)
         {
-            TileNames[i] = bytes.ReadUntil('\n', ref position);
+            TileNames[i] = bytes.ReadLine(ref position);
         }
     }
 

@@ -8,6 +8,11 @@ public static class ByteArrayExtensions
         return BitConverter.ToInt32(bytes, (offset += 4) - 4);
     }
 
+    public static int ReadInt32(this byte[] bytes, int offset)
+    {
+        return BitConverter.ToInt32(bytes, offset);
+    }
+
     public static string ReadLine(this byte[] bytes, ref int offset)
     {
         return ReadUntil(bytes, '\n', ref offset);

@@ -4,7 +4,8 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        LotheaderFile.Read("ignore/27_38.lotheader");
+        var header = LotheaderFile.Read("ignore/27_38.lotheader");
+        var lotpack = LotpackFile.Read("ignore/world_27_38.lotpack", header);
     }
 
     public static void ReadTmxFile()
