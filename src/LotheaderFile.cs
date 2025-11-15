@@ -54,7 +54,7 @@ public class LotheaderFile
 
         if (position != bytes.Length)
         {
-            throw new Exception($"End of file not reached: {position} / {bytes.Length}");
+            throw new Exception($"End of file not reached: {position:N0} / {bytes.Length:N0}");
         }
 
         return header;
@@ -119,7 +119,7 @@ public class LotheaderFile
         else // B42
         {
             MinLayer = Math.Max(MinLayer, bytes.ReadInt32(ref position));
-            MaxLayer = Math.Min(MaxLayer, bytes.ReadInt32(ref position));
+            MaxLayer = Math.Min(MaxLayer, bytes.ReadInt32(ref position) + 1);
         }
     }
 

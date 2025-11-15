@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 
@@ -20,14 +21,33 @@ public class LotpackFile
         var position = 0;
 
         lotpack.Header = header;
+        lotpack.ReadVersion(bytes, ref position);
         lotpack.ReadBlocks(bytes, ref position);
 
         if (position != bytes.Length)
         {
-            throw new Exception($"End of file not reached: {position} / {bytes.Length} ('{path}')");
+            throw new Exception($"End of file not reached: {position:N0} / {bytes.Length:N0} ('{path}')");
         }
 
         return lotpack;
+    }
+
+    private void ReadVersion(byte[] bytes, ref int position)
+    {
+        if (bytes[0..4].SequenceEqual(magic))
+        {
+            position += 4;
+            Version = bytes.ReadInt32(ref position);
+        }
+        else
+        {
+            Version = 0;
+        }
+
+        if(Version != Header.Version)
+        {
+            throw new Exception($"Inconsistant version: '{Version}', header: '{Header.Version}'");
+        }
     }
 
     private void ReadBlocks(byte[] bytes, ref int position)
@@ -54,7 +74,7 @@ public class LotpackFile
 
         var blockDatas = new SquareData[blockSize, blockSize, maxLayer - minLayer];
 
-        for (int z = minLayer; z < maxLayer; z++)
+        for (int z = 0; z < maxLayer - minLayer; z++)
         {
             if (skip >= squarePerLayer)
             {

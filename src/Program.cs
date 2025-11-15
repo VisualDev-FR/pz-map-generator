@@ -3,12 +3,13 @@ using System.IO;
 
 public class Program
 {
-    const string mapPath = "C:/SteamLibrary/steamapps/common/ProjectZomboidB41/media/maps/Muldraugh, KY";
+    const string mapPath = "C:/SteamLibrary/steamapps/common/ProjectZomboidB42/media/maps/Muldraugh, KY";
 
     public static void Main(string[] args)
     {
-        // var header = LotheaderFile.Read("ignore/27_38.lotheader");
-        // var lotpack = LotpackFile.Read("ignore/world_27_38.lotpack", header);
+        // var mapPath = "ignore/B41Map";
+        // var header = LotheaderFile.Read($"{mapPath}/27_38.lotheader");
+        // var lotpack = LotpackFile.Read($"{mapPath}/world_27_38.lotpack", header);
 
         ReadAllMapFiles();
     }
@@ -27,6 +28,8 @@ public class Program
 
                 if (!Path.Exists(headerPath))
                     continue;
+
+                Console.WriteLine(Path.GetFileName(headerPath));
 
                 var header = LotheaderFile.Read(headerPath);
                 var lotpack = LotpackFile.Read(lotpackPath, header);
