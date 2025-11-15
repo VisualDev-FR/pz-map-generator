@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Text;
+
 
 public static class ByteArrayExtensions
 {
@@ -15,24 +17,40 @@ public static class ByteArrayExtensions
 
     public static string ReadLine(this byte[] bytes, ref int offset)
     {
-        return ReadUntil(bytes, '\n', ref offset);
+        return ReadUntil(bytes, "\n", ref offset).Decode(Encoding.UTF8);
     }
 
-    public static string ReadUntil(this byte[] bytes, char pattern, ref int offset)
+    public static byte[] ReadUntil(this byte[] bytes, string pattern, ref int offset)
     {
-        byte bytePattern = (byte)pattern;
+        ReadOnlySpan<byte> span = bytes;
+        ReadOnlySpan<byte> pat = Utils.Encode(pattern);
 
-        for (int i = offset; i < bytes.Length; i++)
-        {
-            if (bytes[i] == bytePattern)
-            {
-                string text = Encoding.UTF8.GetString(bytes, offset, i - offset);
-                offset = i + 1;
+        int index = span[offset..].IndexOf(pat);
 
-                return text;
-            }
-        }
+        if (index < 0)
+            throw new Exception("Pattern not found");
 
-        throw new Exception("Pattern not found");
+        var absoluteIndex = offset + index;
+        var length = absoluteIndex - offset;
+        var result = span.Slice(offset, length).ToArray();
+
+        offset = absoluteIndex + pat.Length;
+
+        return result;
+    }
+
+    public static string Decode(this byte[] bytes, Encoding encoding)
+    {
+        return encoding.GetString(bytes);
+    }
+
+    public static byte[] ReadWithLength(this byte[] bytes, ref int offset)
+    {
+        var length = bytes.ReadInt32(ref offset);
+        var text = bytes[offset..(offset + length)];
+
+        offset += length;
+
+        return text;
     }
 }

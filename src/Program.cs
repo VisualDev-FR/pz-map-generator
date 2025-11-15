@@ -3,19 +3,46 @@ using System.IO;
 
 public class Program
 {
-    const string mapPath = "C:/SteamLibrary/steamapps/common/ProjectZomboidB42/media/maps/Muldraugh, KY";
+    public const string pathB41 = "C:/SteamLibrary/steamapps/common/ProjectZomboidB41";
+
+    public const string pathB42 = "C:/SteamLibrary/steamapps/common/ProjectZomboidB42";
+
+    public const string texturePacks = $"{pathB41}/media/texturepacks";
+
+    public static string MapPath(string gamePath) => $"{gamePath}/media/maps/Muldraugh, KY";
 
     public static void Main(string[] args)
     {
-        // var mapPath = "ignore/B41Map";
-        // var header = LotheaderFile.Read($"{mapPath}/27_38.lotheader");
-        // var lotpack = LotpackFile.Read($"{mapPath}/world_27_38.lotpack", header);
-
-        ReadAllMapFiles();
+        ReadAllPackFiles();
+        ReadAllMapFiles(pathB41);
+        ReadAllMapFiles(pathB42);
     }
 
-    public static void ReadAllMapFiles()
+    public static void ReadAllPackFiles()
     {
+        var packFiles = Directory.GetFiles(texturePacks);
+
+        foreach (var file in packFiles)
+        {
+            string filename = Path.GetFileName(file);
+
+            try
+            {
+                PackFile.Read(file);
+
+                Console.WriteLine(filename);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine($"Error while reading '{filename}' : {exc.Message}");
+            }
+        }
+    }
+
+    public static void ReadAllMapFiles(string gamePath)
+    {
+        string mapPath = MapPath(gamePath);
+
         var totalTimer = Utils.StartTimer();
         var filesCount = 0;
 

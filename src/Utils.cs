@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 
 public static class Utils
 {
@@ -10,4 +11,11 @@ public static class Utils
         return stopwatch;
     }
 
+    public static byte[] Encode(string text, Encoding encoding = null)
+    {
+        if (encoding == null)
+            encoding = Encoding.UTF8;
+
+        return encoding.GetBytes(text);
+    }
 }
