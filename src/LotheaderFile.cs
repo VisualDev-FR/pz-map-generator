@@ -107,7 +107,7 @@ public class LotheaderFile
 
         for (int i = 0; i < tilesCount; i++)
         {
-            TileNames[i] = bytes.ReadLine(ref position);
+            TileNames[i] = bytes.ReadLine(ref position).ReplaceLineEndings("");
         }
     }
 
@@ -332,7 +332,7 @@ public class Room
         var room = new Room();
 
         room.Id = id;
-        room.Name = bytes.ReadLine(ref position);
+        room.Name = bytes.ReadLine(ref position).ReplaceLineEndings("");
         room.Layer = bytes.ReadInt32(ref position);
 
         room.ReadRectangles(bytes, ref position);

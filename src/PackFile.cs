@@ -95,7 +95,7 @@ public class Page
     {
         if (Version == 0)
         {
-            Png = bytes.ReadUntil("\xef\xbe\xad\xde", ref position);
+            Png = bytes.ReadUntil([0xEF, 0xBE, 0xAD, 0xDE], ref position);
         }
         else if (Version == 1)
         {
@@ -105,6 +105,11 @@ public class Page
         {
             throw new Exception($"Unsupported pack version: '{Version}'");
         }
+    }
+
+    public void SavePng(string path)
+    {
+        File.WriteAllBytes(path, Png);
     }
 }
 

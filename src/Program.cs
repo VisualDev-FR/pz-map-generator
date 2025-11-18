@@ -8,26 +8,25 @@ public class Program
 
     public const string pathB42 = "C:/SteamLibrary/steamapps/common/ProjectZomboidB42";
 
-    public const string texturePacks = $"{pathB41}/media/texturepacks";
+    public static string GetTexturesDir(string gamePath) => $"{gamePath}/media/texturepacks";
 
-    public static string MapPath(string gamePath) => $"{gamePath}/media/maps/Muldraugh, KY";
+    public static string GetMapDir(string gamePath) => $"{gamePath}/media/maps/Muldraugh, KY";
 
     public static void Main(string[] args)
     {
-        // ExportBuilding();
-
-        ReadAllMapFiles(pathB41);
-        ReadAllMapFiles(pathB42);
+        TestReadAllMapFiles(pathB41);
+        TestReadAllMapFiles(pathB42);
 
         TestReadWriteAllMapFiles(pathB41);
         TestReadWriteAllMapFiles(pathB42);
 
-        TestReadAllPackFiles();
+        TestReadAllPackFiles(pathB41);
+        TestReadAllPackFiles(pathB42);
     }
 
     public static void TestReadWriteAllMapFiles(string gamePath)
     {
-        string mapPath = MapPath(gamePath);
+        string mapPath = GetMapDir(gamePath);
 
         var totalTimer = Utils.StartTimer();
         var filesCount = 0;
@@ -117,30 +116,33 @@ public class Program
         }
     }
 
-    public static void TestReadAllPackFiles()
+    public static void TestReadAllPackFiles(string gamePath)
     {
-        var packFiles = Directory.GetFiles(texturePacks);
+        var packFiles = Directory.GetFiles(GetTexturesDir(gamePath));
+        var pngDirectory = "ignore/tiles";
+
+        Directory.CreateDirectory(pngDirectory);
 
         foreach (var file in packFiles)
         {
-            string filename = Path.GetFileName(file);
+            if (!file.EndsWith(".pack"))
+                continue;
 
-            try
-            {
-                PackFile.Read(file);
+            var filename = Path.GetFileName(file);
+            var packFile = PackFile.Read(file);
 
-                Console.WriteLine(filename);
-            }
-            catch (Exception exc)
+            foreach (var page in packFile.Pages)
             {
-                Console.WriteLine($"Error while reading '{filename}' : {exc.Message}");
+                page.SavePng($"{pngDirectory}/{page.Name}.png");
             }
+
+            Console.WriteLine($"{filename}: version {packFile.Version}, {packFile.Pages.Length} pages");
         }
     }
 
-    public static void ReadAllMapFiles(string gamePath)
+    public static void TestReadAllMapFiles(string gamePath)
     {
-        string mapPath = MapPath(gamePath);
+        string mapPath = GetMapDir(gamePath);
 
         var totalTimer = Utils.StartTimer();
         var filesCount = 0;
