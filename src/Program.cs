@@ -14,14 +14,35 @@ public class Program
 
     public static void Main(string[] args)
     {
-        TestReadWriteAllMapFiles(pathB41);
-        TestReadWriteAllMapFiles(pathB42);
+        // TestReadWriteAllMapFiles(pathB41);
+        // TestReadWriteAllMapFiles(pathB42);
 
-        TestReadAllPackFiles(pathB41);
-        TestReadAllPackFiles(pathB42);
+        // TestReadAllPackFiles(pathB41);
+        // TestReadAllPackFiles(pathB42);
 
-        ReadAllTileFiles(pathB41);
-        ReadAllTileFiles(pathB42);
+        // ReadAllTileFiles(pathB41);
+        // ReadAllTileFiles(pathB42);
+
+        var header = LotheaderFile.Read("ignore/B42/27_38.lotheader");
+        var lotpack = LotpackFile.Read("ignore/B42/world_27_38.lotpack", header);
+
+        Console.WriteLine($"BlockSizeInSquare: {header.BlockSizeInSquare}");
+
+        var maxTiles = 0;
+
+        for (int x = 0; x < 300; x++)
+        {
+            for (int y = 0; y < 300; y++)
+            {
+                var tile = lotpack.GetSquareData(x, y, 0);
+
+                maxTiles = Math.Max(maxTiles, tile.Tiles.Length);
+
+                // Console.WriteLine($"[{x}, {y}] " + string.Join(" ", tile.Tiles));
+            }
+        }
+
+        Console.WriteLine($"maxTiles: {maxTiles}");
     }
 
     public static void ReadAllTileFiles(string gamePath)
@@ -37,7 +58,7 @@ public class Program
             {
                 TilesFile.Read(file).ToJsonFile($"ignore/tilesdef/{Path.GetFileName(file)}.json");
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 Console.WriteLine($"{exc.Message}: '{file}'");
                 continue;

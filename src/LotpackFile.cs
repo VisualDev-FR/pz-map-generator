@@ -276,6 +276,19 @@ public class LotpackFile
             streamWriter.WriteLine(start.ToString().PadRight(7) + ": " + string.Join(" ", values.Select(v => v.ToString().PadLeft(6))));
         }
     }
+
+    public SquareData GetSquareData(int x, int y, int z)
+    {
+        var chunkX = x / Header.BlockSizeInSquare;
+        var chunkY = y / Header.BlockSizeInSquare;
+
+        var xRel = x % Header.BlockSizeInSquare;
+        var yRel = y % Header.BlockSizeInSquare;
+
+        var chunkIndex = chunkY + chunkX * Header.BlockSizeInSquare;
+
+        return ChunkDatas[chunkIndex][xRel, yRel, z];
+    }
 }
 
 public class SquareData
