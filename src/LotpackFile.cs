@@ -289,7 +289,49 @@ public class LotpackFile
 
         return ChunkDatas[chunkIndex][xRel, yRel, z];
     }
+
+    public List<SquareData> TestGetBuildingTiles(int buildingID)
+    {
+        var building = Header.Buildings[buildingID];
+        var positions = new HashSet<int>();
+        var squareDatas = new List<SquareData>();
+
+        foreach (var roomID in building.RoomIds)
+        {
+            var room = Header.Rooms[roomID];
+
+            foreach (var rect in room.Rectangles)
+            {
+                for (int x = rect.X; x < rect.X + rect.Width; x++)
+                {
+                    for (int y = rect.Y; y < rect.Y + rect.Height; y++)
+                    {
+                        var hashcode = x + y * 300;
+
+                        if (positions.Contains(hashcode))
+                            continue;
+
+                        positions.Add(hashcode);
+
+                        for (int z = 0; z < Header.MaxLayer - Header.MinLayer; z++)
+                        {
+                            var squareData = GetSquareData(x, y, z);
+
+                            if (squareData != null)
+                            {
+                                squareDatas.Add(squareData);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return squareDatas;
+    }
 }
+
+
 
 public class SquareData
 {

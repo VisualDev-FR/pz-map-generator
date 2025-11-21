@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+
 
 public class Program
 {
@@ -14,15 +16,46 @@ public class Program
 
     public static void Main(string[] args)
     {
-        // TestReadWriteAllMapFiles(pathB41);
-        // TestReadWriteAllMapFiles(pathB42);
+        var header = LotheaderFile.Read("ignore/B41/27_38.lotheader");
+        var lotpack = LotpackFile.Read("ignore/B41/world_27_38.lotpack", header);
 
-        // TestReadAllPackFiles(pathB41);
-        // TestReadAllPackFiles(pathB42);
+        var building = header.Buildings[0];
+        var rooms = building.RoomIds.Select(id => header.Rooms[id]);
 
-        // ReadAllTileFiles(pathB41);
-        // ReadAllTileFiles(pathB42);
+        var xmin = 300;
+        var ymin = 300;
+        var xmax = 0;
+        var ymax = 0;
 
+        foreach (var room in rooms)
+        {
+            foreach (var rect in room.Rectangles)
+            {
+                xmin = Math.Min(xmin, rect.X);
+                ymin = Math.Min(ymin, rect.Y);
+
+                xmax = Math.Max(xmax, rect.X + rect.Width);
+                ymax = Math.Max(ymax, rect.Y + rect.Height);
+            }
+        }
+
+        Console.WriteLine($"[{xmin}, {ymin}] [{xmax}, {ymax}]");
+    }
+
+    public static void TestMain()
+    {
+        TestReadWriteAllMapFiles(pathB41);
+        TestReadWriteAllMapFiles(pathB42);
+
+        TestReadAllPackFiles(pathB41);
+        TestReadAllPackFiles(pathB42);
+
+        ReadAllTileFiles(pathB41);
+        ReadAllTileFiles(pathB42);
+    }
+
+    public static void TestLotpack()
+    {
         var header = LotheaderFile.Read("ignore/B42/27_38.lotheader");
         var lotpack = LotpackFile.Read("ignore/B42/world_27_38.lotpack", header);
 
