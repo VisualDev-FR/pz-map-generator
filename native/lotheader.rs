@@ -3,10 +3,10 @@ use std::{
     io::{Cursor, Read, Result, Seek, Write},
 };
 
-use crate::constants::{BytesCursor, SQR_CELL_SIZE_IN_BLOCKS};
+use crate::constants::{BytesCursor, BLOCKS_PER_CELL};
 use crate::{buf_reader_extensions::BinReader, buf_writer_extensions::BinWriter};
 
-type ZSpawnArray = [u8; SQR_CELL_SIZE_IN_BLOCKS];
+type ZSpawnArray = [u8; BLOCKS_PER_CELL];
 
 pub struct Rectangle {
     pub x: i32,
@@ -182,7 +182,7 @@ impl Lotheader {
     }
 
     fn read_spawns(cursor: &mut BytesCursor) -> Result<ZSpawnArray> {
-        let mut buf = [0u8; SQR_CELL_SIZE_IN_BLOCKS];
+        let mut buf = [0u8; BLOCKS_PER_CELL];
         cursor.read_exact(&mut buf)?;
 
         Ok(buf)

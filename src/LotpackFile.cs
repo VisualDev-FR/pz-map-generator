@@ -67,31 +67,31 @@ public class LotpackFile
 
     private SquareData[,,] ReadSquareDatas(byte[] bytes, LotheaderFile header, ref int position)
     {
-        var chunkSize = header.BlockSizeInSquare;
-        var squarePerLayer = chunkSize * chunkSize;
+        var BLOCK_SIZE_IN_SQUARE = header.BlockSizeInSquare;
+        var SQUARE_PER_BLOCK = BLOCK_SIZE_IN_SQUARE * BLOCK_SIZE_IN_SQUARE;
         var minLayer = header.MinLayer;
         var maxLayer = header.MaxLayer;
         var skip = 0;
 
-        var squareDatas = new SquareData[chunkSize, chunkSize, maxLayer - minLayer];
+        var squareDatas = new SquareData[BLOCK_SIZE_IN_SQUARE, BLOCK_SIZE_IN_SQUARE, maxLayer - minLayer];
 
         for (int z = 0; z < maxLayer - minLayer; z++)
         {
-            if (skip >= squarePerLayer)
+            if (skip >= SQUARE_PER_BLOCK)
             {
-                skip -= squarePerLayer;
+                skip -= SQUARE_PER_BLOCK;
                 continue;
             }
 
-            for (int x = 0; x < chunkSize; x++)
+            for (int x = 0; x < BLOCK_SIZE_IN_SQUARE; x++)
             {
-                if (skip >= chunkSize)
+                if (skip >= BLOCK_SIZE_IN_SQUARE)
                 {
-                    skip -= chunkSize;
+                    skip -= BLOCK_SIZE_IN_SQUARE;
                     continue;
                 }
 
-                for (int y = 0; y < chunkSize; y++)
+                for (int y = 0; y < BLOCK_SIZE_IN_SQUARE; y++)
                 {
                     if (skip > 0)
                     {

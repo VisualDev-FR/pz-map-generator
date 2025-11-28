@@ -4,11 +4,8 @@ use crate::constants::BytesCursor;
 
 pub trait BinReader {
     fn read_i32(&mut self) -> Result<i32>;
-
     fn read_line_trimmed(&mut self) -> Result<String>;
-
     fn read_n_chars(&mut self, size: usize) -> Result<String>;
-
     fn ensure_end_reached(&mut self) -> Result<()>;
 }
 
