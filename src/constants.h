@@ -20,6 +20,6 @@ namespace constants
 
     constexpr std::string_view MAGIC_LOTHEADER = "LOTH";
     constexpr std::string_view MAGIC_LOTPACK = "LOTP";
-    constexpr std::string_view MAGIC_LOTPACK = "PZPK";
+    constexpr std::string_view MAGIC_PACK = "PZPK";
     constexpr std::string_view MAGIC_TILEDEF = "tdef";
 }
