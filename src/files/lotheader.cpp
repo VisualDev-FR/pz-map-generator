@@ -1,12 +1,13 @@
-#include <fmt/base.h>
+#include <fmt/format.h>
 
 #include "constants.h"
+#include "exceptions.h"
 #include "io/binary_reader.h"
 #include "lotheader.h"
 
 LotHeader LotHeader::read(const std::string &filename)
 {
-    throw std::runtime_error("not implemented");
+    throw Exceptions::NotImplemented();
 }
 
 LotHeader LotHeader::read(const BytesBuffer &buffer)
@@ -17,13 +18,17 @@ LotHeader LotHeader::read(const BytesBuffer &buffer)
     header.magic = BinaryReader::read_n_chars(buffer, 4, offset);
     header.version = BinaryReader::readInt32(buffer, offset);
     header.tileNames = LotHeader::readTileNames(buffer, offset);
+    header.width = BinaryReader::readInt32(buffer, offset);
+    header.height = BinaryReader::readInt32(buffer, offset);
+    header.minLayer = BinaryReader::readInt32(buffer, offset);
+    header.maxLayer = BinaryReader::readInt32(buffer, offset) + 1;
     header.rooms = LotHeader::readRooms(buffer, offset);
     header.buildings = LotHeader::readBuildings(buffer, offset);
     header.spawns = BinaryReader::readExact(buffer, constants::BLOCKS_PER_CELL, offset);
 
     if (offset != buffer.size())
     {
-        throw std::runtime_error("File end not reached.");
+        throw Exceptions::FileEndNotReached(offset, buffer.size());
     }
 
     return header;
@@ -140,5 +145,5 @@ std::vector<Building> LotHeader::readBuildings(const BytesBuffer &buffer, size_t
 
 BytesBuffer LotHeader::readSpawns(const BytesBuffer &buffer, size_t &offset)
 {
-    return BytesBuffer();
+    throw Exceptions::NotImplemented();
 }

@@ -30,6 +30,8 @@ void read_header()
 
     fmt::println("magic: {}, version: {}, md5: {}", header.magic, header.version, headerHash);
     fmt::println("magic: {}, version: {}, md5: {}", lotpack.magic, lotpack.version, lotpackHash);
+
+    fmt::println("squareMap size: {}", lotpack.squareMap.size());
 }
 
 int main()

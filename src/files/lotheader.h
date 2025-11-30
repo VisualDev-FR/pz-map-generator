@@ -42,9 +42,11 @@ class LotHeader
 {
 public:
     std::string magic = "";
-    int version = 0;
-    int width = 0;
-    int height = 0;
+    int32_t version = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    int32_t maxLayer = 0;
+    int32_t minLayer = 0;
 
     std::vector<std::string> tileNames;
     std::vector<Room> rooms;

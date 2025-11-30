@@ -36,7 +36,7 @@ std::string BinaryReader::readLineTrimmed(const BytesBuffer &buffer, size_t &off
         return line;
     }
 
-    throw std::runtime_error("pattern not found");
+    throw std::runtime_error("line terminator not found");
 }
 
 BytesBuffer BinaryReader::readExact(const BytesBuffer &buffer, uint32_t size, size_t &offset)

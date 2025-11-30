@@ -81,7 +81,7 @@ std::string MD5::toHash(const std::vector<uint8_t>& data)
     unsigned char* digest = alg.Digest();
 
     char hexOutput[33]; // 32 chars + null terminator
-    sprintf(hexOutput,
+    sprintf_s(hexOutput,
             "%02x%02x%02x%02x%02x%02x%02x%02x"
             "%02x%02x%02x%02x%02x%02x%02x%02x",
             digest[0],  digest[1],  digest[2],  digest[3],
