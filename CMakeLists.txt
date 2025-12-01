@@ -14,12 +14,17 @@ endif()
 find_package(fmt CONFIG REQUIRED)
 find_package(cpptrace CONFIG REQUIRED)
 find_package(doctest CONFIG REQUIRED)
+find_package(lodepng CONFIG REQUIRED)
 
 # ---- Library ----
 file(GLOB_RECURSE LIB_SOURCES "lib/*.cpp")
 add_library(pzlib STATIC ${LIB_SOURCES})
 target_include_directories(pzlib PUBLIC lib)
-target_link_libraries(pzlib PUBLIC fmt::fmt cpptrace::cpptrace)
+target_link_libraries(pzlib PUBLIC
+    fmt::fmt
+    cpptrace::cpptrace
+    lodepng
+)
 
 # ---- Main executable ----
 file(GLOB_RECURSE MAIN_SOURCES "main/*.cpp")

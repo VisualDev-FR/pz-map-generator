@@ -7,6 +7,7 @@
 
 #include <fmt/format.h>
 #include <cpptrace/from_current.hpp>
+#include <lodepng.h>
 
 #include "files/lotheader.h"
 #include "files/lotpack.h"
@@ -45,11 +46,31 @@ void read_header()
     fmt::println("tilesheets: {}", tileDefinition.tileSheets.size());
 }
 
+void write_png()
+{
+    unsigned width = 256, height = 256;
+    std::vector<unsigned char> image(width * height * 4); // RGBA
+
+    for (unsigned y = 0; y < height; ++y)
+    {
+        for (unsigned x = 0; x < width; ++x)
+        {
+            image[4 * (y * width + x) + 0] = x;   // R
+            image[4 * (y * width + x) + 1] = y;   // G
+            image[4 * (y * width + x) + 2] = 128; // B
+            image[4 * (y * width + x) + 3] = 255; // A
+        }
+    }
+
+    unsigned error = lodepng::encode("ignore/test.png", image, width, height);
+    if (error) std::cout << "Erreur PNG: " << lodepng_error_text(error) << std::endl;
+}
+
 int main()
 {
     CPPTRACE_TRY
     {
-        read_header();
+        write_png();
     }
     CPPTRACE_CATCH(const std::exception &e)
     {
