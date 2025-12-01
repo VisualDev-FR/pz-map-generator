@@ -1,47 +1,33 @@
 cmake_minimum_required(VERSION 3.26)
 
-# ---- Project ----
-project(pz-map-generator
-    VERSION 0.1.0
-    LANGUAGES CXX
-)
+project(pz-map-generator VERSION 0.1.0 LANGUAGES CXX)
 
-# ---- Options ----
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-
-# ---- vcpkg debug helper (optional) ----
-# message(STATUS "Using vcpkg toolchain: ${CMAKE_TOOLCHAIN_FILE}")
-
-# ---- Warnings (Platform aware) ----
-if (MSVC)
+if(MSVC)
     add_compile_options(/W4 /permissive- /EHsc)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# ---- Collect all sources recursively ----
-file(GLOB_RECURSE SOURCES
-    "${PROJECT_SOURCE_DIR}/src/*.cpp"
-)
-
-file(GLOB_RECURSE HEADERS
-    "${PROJECT_SOURCE_DIR}/src/*.h"
-    "${PROJECT_SOURCE_DIR}/src/*.hpp"
-)
-
-# ---- Target ----
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
-target_include_directories(${PROJECT_NAME} PRIVATE
-    "${PROJECT_SOURCE_DIR}/src"
-)
-
-# ---- external libs ----
 find_package(fmt CONFIG REQUIRED)
 find_package(cpptrace CONFIG REQUIRED)
+find_package(doctest CONFIG REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
-target_link_libraries(${PROJECT_NAME} PRIVATE cpptrace::cpptrace)
+# ---- Library ----
+file(GLOB_RECURSE LIB_SOURCES "lib/*.cpp")
+add_library(pzlib STATIC ${LIB_SOURCES})
+target_include_directories(pzlib PUBLIC lib)
+target_link_libraries(pzlib PUBLIC fmt::fmt cpptrace::cpptrace)
+
+# ---- Main executable ----
+file(GLOB_RECURSE MAIN_SOURCES "main/*.cpp")
+add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
+target_link_libraries(${PROJECT_NAME} PRIVATE pzlib)
+
+# ---- Test executable ----
+file(GLOB TEST_SOURCES "tests/*.cpp")
+add_executable(tests tests/test_main.cpp ${TEST_SOURCES})
+target_include_directories(tests PRIVATE lib)
+target_link_libraries(tests PRIVATE pzlib doctest::doctest)

@@ -8,7 +8,9 @@
             "cppStandard": "c++20",
             "intelliSenseMode": "${default}",
             "includePath": [
-                "${workspaceFolder}/src",
+                "${workspaceFolder}/main",
+                "${workspaceFolder}/lib",
+                "${workspaceFolder}/tests",
                 "${VCPKG_HOME}/installed/x64-windows/include"
             ]
         }
