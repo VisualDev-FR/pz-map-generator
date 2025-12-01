@@ -27,7 +27,7 @@ add_executable(${PROJECT_NAME} ${MAIN_SOURCES})
 target_link_libraries(${PROJECT_NAME} PRIVATE pzlib)
 
 # ---- Test executable ----
-file(GLOB TEST_SOURCES "tests/*.cpp")
-add_executable(tests tests/test_main.cpp ${TEST_SOURCES})
-target_include_directories(tests PRIVATE lib)
+file(GLOB_RECURSE TEST_SOURCES "tests/*.cpp")
+add_executable(tests ${TEST_SOURCES})
+target_include_directories(pzlib PUBLIC lib)
 target_link_libraries(tests PRIVATE pzlib doctest::doctest)
