@@ -21,7 +21,7 @@ TileDefinition TileDefinition::read(const BytesBuffer &buffer)
     return tileDefinition;
 }
 
-std::vector<TileSheet> TileDefinition::readTileSheets(const BytesBuffer &buffer, size_t &offset)
+std::vector<TileDefinition::TileSheet> TileDefinition::readTileSheets(const BytesBuffer &buffer, size_t &offset)
 {
     int32_t tileSheetsCount = BinaryReader::readInt32(buffer, offset);
     std::vector<TileSheet> tileSheets(tileSheetsCount);
