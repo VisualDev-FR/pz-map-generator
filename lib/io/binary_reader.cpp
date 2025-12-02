@@ -1,5 +1,8 @@
-#include "binary_reader.h"
+#include <algorithm>
+#include <cstdint>
+#include <vector>
 
+#include "binary_reader.h"
 #include "exceptions.h"
 
 std::string BinaryReader::read_n_chars(const BytesBuffer &buffer, size_t size, size_t &offset)
@@ -78,4 +81,23 @@ BytesBuffer BinaryReader::readExact(const BytesBuffer &buffer, uint32_t size, si
     offset += size;
 
     return result;
+}
+
+BytesBuffer BinaryReader::readUntil(const BytesBuffer &buffer, const BytesBuffer &pattern, size_t &offset)
+{
+    auto it = std::search(buffer.begin() + offset, buffer.end(), pattern.begin(), pattern.end());
+
+    if (it == buffer.end())
+    {
+        throw std::runtime_error("Pattern not found.");
+    }
+
+    std::size_t pos = std::distance(buffer.begin(), it);
+    std::size_t end = pos + pattern.size();
+
+    std::vector<uint8_t> slice(buffer.begin() + offset, buffer.begin() + end);
+
+    offset = end;
+
+    return slice;
 }

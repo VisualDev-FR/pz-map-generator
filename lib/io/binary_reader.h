@@ -16,4 +16,5 @@ namespace BinaryReader
     std::string readStringWithLength(const BytesBuffer &buffer, size_t &offset);
     BytesBuffer readBytesWithLength(const BytesBuffer &buffer, size_t &offset);
     BytesBuffer readExact(const BytesBuffer &buffer, uint32_t size, size_t &offset);
+    BytesBuffer readUntil(const BytesBuffer &buffer, const BytesBuffer &pattern, size_t &offset);
 };

@@ -98,4 +98,30 @@ TEST_SUITE("BinaryReader")
         offset = 4;
         CHECK_THROWS_AS(BinaryReader::readExact(buf, 2, offset), std::runtime_error);
     }
+
+    TEST_CASE("readUntil extracts correct slice and updates offset")
+    {
+        BytesBuffer buffer = { 0x01, 0x02, 0x03, 0xAA, 0xBB, 0xCC, 0x04 };
+        BytesBuffer pattern = { 0xAA, 0xBB };
+
+        size_t offset = 0;
+
+        auto result = BinaryReader::readUntil(buffer, pattern, offset);
+
+        BytesBuffer expected = { 0x01, 0x02, 0x03, 0xAA, 0xBB };
+
+        CHECK(result == expected);
+        CHECK(offset == 5);
+    }
+
+    TEST_CASE("readUntil throws when pattern not found")
+    {
+        BytesBuffer buffer = { 0x10, 0x20, 0x30 };
+        BytesBuffer pattern = { 0xAA, 0xBB };
+
+        size_t offset = 0;
+
+        CHECK_THROWS_AS(BinaryReader::readUntil(buffer, pattern, offset),
+            std::runtime_error);
+    }
 }
