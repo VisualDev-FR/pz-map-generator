@@ -6,8 +6,11 @@
 #include <vector>
 
 #include <fmt/format.h>
-#include <cpptrace/from_current.hpp>
 #include <lodepng.h>
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+#include <cpptrace/from_current.hpp>
 
 #include "files/lotheader.h"
 #include "files/lotpack.h"
@@ -46,14 +49,13 @@ void read_header()
     fmt::println("tilesheets: {}", tileDefinition.tileSheets.size());
 }
 
-void write_png()
+BytesBuffer create_png(size_t width, size_t height)
 {
-    unsigned width = 256, height = 256;
-    std::vector<unsigned char> image(width * height * 4); // RGBA
+    BytesBuffer image(width * height * 4); // RGBA
 
-    for (unsigned y = 0; y < height; ++y)
+    for (uint8_t y = 0; y < height; ++y)
     {
-        for (unsigned x = 0; x < width; ++x)
+        for (uint8_t x = 0; x < width; ++x)
         {
             image[4 * (y * width + x) + 0] = x;   // R
             image[4 * (y * width + x) + 1] = y;   // G
@@ -62,15 +64,64 @@ void write_png()
         }
     }
 
-    unsigned error = lodepng::encode("ignore/test.png", image, width, height);
-    if (error) std::cout << "Erreur PNG: " << lodepng_error_text(error) << std::endl;
+    BytesBuffer result;
+    unsigned error = lodepng::encode(result, image.data(), width, height);
+
+    if (error)
+    {
+        std::cout << "Erreur PNG: " << lodepng_error_text(error) << std::endl;
+    }
+
+    return result;
+}
+
+void main_window()
+{
+    sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "My window", sf::Style::Close | sf::Style::Titlebar);
+
+    sf::Vector2i size(128, 128);
+    BytesBuffer pngBuffer = create_png(size.x, size.y);
+
+    sf::Texture texture;
+    if (!texture.loadFromMemory(pngBuffer.data(), pngBuffer.size()))
+    {
+        std::cerr << "Erreur : Échec du chargement de la texture depuis le buffer PNG." << std::endl;
+        return;
+    }
+
+    sf::Sprite sprite1(texture);
+    sf::Sprite sprite2(texture);
+
+    sprite2.setPosition({ 128, 128 });
+    sprite2.setScale({ 0.5f, 0.5f });
+
+    std::cout << "Texture chargée avec succès." << std::endl;
+
+    // run the program as long as the window is open
+    while (window.isOpen())
+    {
+        // check all the window's events that were triggered since the last iteration of the loop
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+                window.close();
+
+            if (event->is<sf::Event::MouseButtonReleased>())
+                fmt::println("Mouse pressed!");
+        }
+
+        window.clear();
+        window.draw(sprite1);
+        window.draw(sprite2);
+        window.display();
+    }
 }
 
 int main()
 {
     CPPTRACE_TRY
     {
-        write_png();
+        main_window();
     }
     CPPTRACE_CATCH(const std::exception &e)
     {

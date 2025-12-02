@@ -15,6 +15,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(cpptrace CONFIG REQUIRED)
 find_package(doctest CONFIG REQUIRED)
 find_package(lodepng CONFIG REQUIRED)
+find_package(SFML COMPONENTS System Graphics Window CONFIG REQUIRED)
 
 # ---- Library ----
 file(GLOB_RECURSE LIB_SOURCES "lib/*.cpp")
@@ -24,6 +25,9 @@ target_link_libraries(pzlib PUBLIC
     fmt::fmt
     cpptrace::cpptrace
     lodepng
+    SFML::System
+    SFML::Graphics
+    SFML::Window
 )
 
 # ---- Main executable ----
