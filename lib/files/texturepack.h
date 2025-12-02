@@ -36,7 +36,10 @@ public:
 
     TexturePack() = default;
 
+    static TexturePack read(const std::string &path);
     static TexturePack read(const BytesBuffer &buffer);
-    static std::vector<Page> readPages(const BytesBuffer &buffer, uint32_t version, size_t &offset);
+    static int32_t readVersion(const BytesBuffer &buffer, std::string magic, size_t &offset);
+    static BytesBuffer readPNG(const BytesBuffer &buffer, int32_t version, size_t &offset);
+    static std::vector<Page> readPages(const BytesBuffer &buffer, int32_t version, size_t &offset);
     static std::vector<Texture> readTextures(const BytesBuffer &buffer, size_t &offset);
 };
