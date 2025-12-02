@@ -65,7 +65,7 @@ BytesBuffer BinaryReader::readBytesWithLength(const BytesBuffer &buffer, size_t 
         throw std::runtime_error("buffer too small");
 
     BytesBuffer result(size);
-    std::memcpy(result.data(), buffer.data() + offset, 4);
+    std::memcpy(result.data(), buffer.data() + offset, size);
     offset += size;
 
     return result;
@@ -93,11 +93,9 @@ BytesBuffer BinaryReader::readUntil(const BytesBuffer &buffer, const BytesBuffer
     }
 
     std::size_t pos = std::distance(buffer.begin(), it);
-    std::size_t end = pos + pattern.size();
+    std::vector<uint8_t> slice(buffer.begin() + offset, buffer.begin() + pos);
 
-    std::vector<uint8_t> slice(buffer.begin() + offset, buffer.begin() + end);
-
-    offset = end;
+    offset = pos + pattern.size();
 
     return slice;
 }

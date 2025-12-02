@@ -108,7 +108,7 @@ TEST_SUITE("BinaryReader")
 
         auto result = BinaryReader::readUntil(buffer, pattern, offset);
 
-        BytesBuffer expected = { 0x01, 0x02, 0x03, 0xAA, 0xBB };
+        BytesBuffer expected = { 0x01, 0x02, 0x03 };
 
         CHECK(result == expected);
         CHECK(offset == 5);
