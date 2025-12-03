@@ -16,6 +16,7 @@ find_package(cpptrace CONFIG REQUIRED)
 find_package(doctest CONFIG REQUIRED)
 find_package(lodepng CONFIG REQUIRED)
 find_package(SFML COMPONENTS System Graphics Window CONFIG REQUIRED)
+find_package(ImGui-SFML CONFIG REQUIRED)
 
 # ---- Library ----
 file(GLOB_RECURSE LIB_SOURCES "lib/*.cpp")
@@ -28,6 +29,7 @@ target_link_libraries(pzlib PUBLIC
     SFML::System
     SFML::Graphics
     SFML::Window
+    ImGui-SFML::ImGui-SFML
 )
 
 # ---- Main executable ----

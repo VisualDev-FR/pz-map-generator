@@ -60,7 +60,7 @@ std::unordered_map<std::string, std::string> TileDefinition::readProperties(cons
     uint32_t propertiesCount = BinaryReader::readInt32(buffer, offset);
     std::unordered_map<std::string, std::string> properties(propertiesCount);
 
-    for (int i = 0; i < propertiesCount; i++)
+    for (uint32_t i = 0; i < propertiesCount; i++)
     {
         std::string name = BinaryReader::readLineTrimmed(buffer, offset);
         std::string value = BinaryReader::readLineTrimmed(buffer, offset);

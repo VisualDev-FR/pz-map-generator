@@ -1,13 +1,13 @@
+/target
 /ignore
 /obj
 /bin
 /build
 /**/.pzeditor
 
+imgui.ini
+
 *.dll
 *.exe
 *.zip
 
-# Added by cargo
-
-/target

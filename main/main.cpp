@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "imgui-SFML.h"
+#include "imgui.h"
 #include <fmt/format.h>
 #include <lodepng.h>
 #include <SFML/Graphics.hpp>
@@ -100,9 +102,88 @@ sf::Texture loadTexture(TexturePack::Page &page)
     return texture;
 }
 
+void drawSpriteOutline(sf::RenderWindow &window, sf::Sprite &sprite, TexturePack::Page &page, TexturePack::Texture *&hoveredTexture)
+{
+    sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    sf::Transform inverse = sprite.getInverseTransform();
+    sf::Vector2f local = inverse.transformPoint(mouse);
+
+    hoveredTexture = getTextureByPosition(page, local);
+
+    if (hoveredTexture != nullptr)
+    {
+        sf::RectangleShape spriteOutiline = getOutlineRectangle(hoveredTexture, sprite.getTransform());
+        window.draw(spriteOutiline);
+    }
+}
+
+void drawDebugWindow(const sf::RenderWindow &window, TexturePack::Texture *hoveredTexture, bool firstFrame)
+{
+    const float panelWidth = 250.0;
+
+    std::string spriteName = "N/A";
+    if (hoveredTexture != nullptr)
+    {
+        spriteName = hoveredTexture->name;
+    }
+
+    sf::Vector2u winSize = window.getSize();
+
+    // fmt::println("pos: [{}, {}], size: [{}, {}]", winSize.x - panelWidth, winSize.y, panelWidth, winSize.y);
+
+    ImGuiWindowFlags winflags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove;
+
+    ImGui::SetNextWindowPos(ImVec2(winSize.x - panelWidth, 0));
+    ImGui::SetNextWindowSize(ImVec2(panelWidth, winSize.y));
+    ImGui::Begin("Debug", nullptr, winflags);
+    ImGui::Text("Sprite: %s", spriteName.c_str());
+    ImGui::End();
+}
+
+void drawExplorerWindow(const sf::RenderWindow &window, const GameFilesService &gameFileService, bool firstFrame)
+{
+    const float panelWidth = 250.0;
+
+    sf::Vector2u winSize = window.getSize();
+
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(panelWidth, winSize.y));
+    ImGui::Begin("TileSheets");
+
+    // Liste de données
+    std::vector<std::string> items = gameFileService.getPageNames();
+
+    // Buffer pour le filtre
+    static char filterBuffer[128] = "";
+
+    ImGui::InputText("Filter", filterBuffer, IM_ARRAYSIZE(filterBuffer));
+    ImGui::BeginChild("ListBox", ImVec2(0, 0), true);
+
+    for (const auto &item : items)
+    {
+        if (filterBuffer[0] == '\0' || item.find(filterBuffer) != std::string::npos)
+        {
+            if (ImGui::Selectable(item.c_str()))
+            {
+                // Action lorsque l'item est sélectionné
+                fmt::println("Item sélectionné: {}", item);
+            }
+        }
+    }
+
+    ImGui::EndChild();
+    ImGui::End();
+}
+
 void main_window()
 {
     sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "My window");
+    sf::Clock deltaClock;
+
+    if (!ImGui::SFML::Init(window))
+    {
+        throw std::runtime_error("failed intilializing ImGui.");
+    }
 
     GameFilesService gamefileService(constants::GAME_PATH);
     TexturePack::Page page = gamefileService.getPageByName("Tiles1x1");
@@ -110,54 +191,54 @@ void main_window()
     sf::Vector2u textureSize = getPNGSize(page.png);
     sf::Texture texture = loadTexture(page);
     sf::Sprite sprite(texture);
-    const float size = 1.5f;
-    sprite.setScale({size, size});
+    const float size = 1.0f;
+    sprite.setScale({ size, size });
 
     TexturePack::Texture *hoveredTexture = nullptr;
+
+    bool firstFrame = true;
 
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
         {
-            if (event->is<sf::Event::Closed>())
+            ImGui::SFML::ProcessEvent(window, *event);
+
+            if (!ImGui::GetIO().WantCaptureMouse)
             {
-                window.close();
-            }
-            else if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
-            {
-                if (keyPressed->scancode == sf::Keyboard::Scancode::Up)
-                    window.close();
-            }
-            else if (const auto *mouseReleased = event->getIf<sf::Event::MouseButtonReleased>())
-            {
-                if (hoveredTexture != nullptr)
+                if (event->is<sf::Event::Closed>())
                 {
-                    fmt::println("{}", hoveredTexture->name);
+                    window.close();
                 }
-            }
-            else if (const auto *resized = event->getIf<sf::Event::Resized>())
-            {
-                sf::FloatRect visibleArea({ 0.f, 0.f }, { static_cast<float>(resized->size.x), static_cast<float>(resized->size.y) });
-                window.setView(sf::View(visibleArea));
+                else if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
+                {
+                    if (keyPressed->scancode == sf::Keyboard::Scancode::Up)
+                        window.close();
+                }
+                else if (const auto *resized = event->getIf<sf::Event::Resized>())
+                {
+                    sf::FloatRect visibleArea({ 0.f, 0.f }, { static_cast<float>(resized->size.x), static_cast<float>(resized->size.y) });
+                    window.setView(sf::View(visibleArea));
+                }
             }
         }
 
+        // UI drawings
+        ImGui::SFML::Update(window, deltaClock.restart());
+
+        // debug window
+        drawExplorerWindow(window, gamefileService, firstFrame);
+        drawDebugWindow(window, hoveredTexture, firstFrame);
+
+        // viewport drawings
         window.clear();
         window.draw(sprite);
 
-        sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-        sf::Transform inverse = sprite.getInverseTransform();
-        sf::Vector2f local = inverse.transformPoint(mouse);
+        drawSpriteOutline(window, sprite, page, hoveredTexture);
 
-        hoveredTexture = getTextureByPosition(page, local);
-
-        if (hoveredTexture != nullptr)
-        {
-            sf::RectangleShape spriteOutiline = getOutlineRectangle(hoveredTexture, sprite.getTransform());
-            window.draw(spriteOutiline);
-        }
-
+        ImGui::SFML::Render(window);
         window.display();
+        firstFrame = false;
     }
 }
 
