@@ -119,13 +119,7 @@ void drawSpriteOutline(sf::RenderWindow &window, sf::Sprite &sprite, TexturePack
 
 void drawDebugWindow(const sf::RenderWindow &window, TexturePack::Texture *hoveredTexture, bool firstFrame)
 {
-    const float panelWidth = 250.0;
-
-    std::string spriteName = "N/A";
-    if (hoveredTexture != nullptr)
-    {
-        spriteName = hoveredTexture->name;
-    }
+    const float panelWidth = 350.0;
 
     sf::Vector2u winSize = window.getSize();
 
@@ -136,7 +130,20 @@ void drawDebugWindow(const sf::RenderWindow &window, TexturePack::Texture *hover
     ImGui::SetNextWindowPos(ImVec2(winSize.x - panelWidth, 0));
     ImGui::SetNextWindowSize(ImVec2(panelWidth, winSize.y));
     ImGui::Begin("Debug", nullptr, winflags);
-    ImGui::Text("Sprite: %s", spriteName.c_str());
+
+    if (hoveredTexture != nullptr)
+    {
+        ImGui::Text("name: %s", hoveredTexture->name.c_str());
+        ImGui::Text("x: %d", hoveredTexture->x);
+        ImGui::Text("y: %d", hoveredTexture->y);
+        ImGui::Text("width: %d", hoveredTexture->width);
+        ImGui::Text("height: %d", hoveredTexture->height);
+        ImGui::Text("ox: %d", hoveredTexture->ox);
+        ImGui::Text("oy: %d", hoveredTexture->oy);
+        ImGui::Text("ow: %d", hoveredTexture->ow);
+        ImGui::Text("oh: %d", hoveredTexture->oh);
+    }
+
     ImGui::End();
 }
 
