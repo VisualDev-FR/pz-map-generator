@@ -3,13 +3,21 @@
 #include <stdexcept>
 #include <string>
 
+#include <fmt/base.h>
 #include <fmt/format.h>
 #include <lodepng.h>
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
+#include <SFML/Window/WindowEnums.hpp>
+#include <TGUI/Backend/SFML-Graphics.hpp>
+#include <TGUI/TGUI.hpp>
 #include <cpptrace/from_current.hpp>
 
+#include "TGUI/Color.hpp"
+#include "TGUI/Widgets/Label.hpp"
+#include "TGUI/Widgets/Panel.hpp"
 #include "constants.h"
 #include "files/texturepack.h"
 #include "services/game_files_service.h"
@@ -126,18 +134,26 @@ void main_window()
 
     bool firstFrame = true;
 
+    tgui::Gui gui{ window };
+
+    auto panel = tgui::Panel::create();
+    panel->getRenderer()->setBackgroundColor(tgui::Color(54, 61, 74));
+
+    auto label = tgui::Label::create();
+    label->getRenderer()->setTextColor(tgui::Color::White);
+    panel->add(label);
+
+    gui.add(panel);
+
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
         {
+            gui.handleEvent(*event);
+
             if (event->is<sf::Event::Closed>())
             {
                 window.close();
-            }
-            else if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>())
-            {
-                if (keyPressed->scancode == sf::Keyboard::Scancode::Up)
-                    window.close();
             }
             else if (const auto *resized = event->getIf<sf::Event::Resized>())
             {
@@ -147,11 +163,25 @@ void main_window()
         }
 
         // viewport drawings
-        window.clear();
+        window.clear(sf::Color(33, 38, 46));
         window.draw(sprite);
+
+        auto winsize = window.getSize();
+        panel->setSize(250, winsize.y);
+        panel->setPosition(winsize.x - 250, 0);
 
         drawSpriteOutline(window, sprite, page, hoveredTexture);
 
+        if (hoveredTexture != nullptr)
+        {
+            label->setText("name: " + hoveredTexture->name);
+        }
+        else
+        {
+            label->setText("");
+        }
+
+        gui.draw();
         window.display();
         firstFrame = false;
     }

@@ -23,3 +23,7 @@ It uses Procedural Generation to build unique worlds, re-using assets of the ori
 ### Previewer
 - [ ] Setup static cell viewer from gamefiles
 - [ ] Setup dynamic world viewer from gamefiles
+
+## Issues
+
+* window title is white, even in dark mode (see https://github.com/godotengine/godot-proposals/issues/1868#issuecomment-1166589949)

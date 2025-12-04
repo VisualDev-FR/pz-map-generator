@@ -37,6 +37,7 @@ target_link_libraries(pzlib PUBLIC
     SFML::Graphics
     SFML::Window
     tgui
+    dwmapi
 )
 
 # Main executable
