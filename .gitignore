@@ -1,13 +1,12 @@
+/dependencies
+/target
 /ignore
+/build
 /obj
 /bin
-/build
 /**/.pzeditor
 
 *.dll
 *.exe
 *.zip
 
-# Added by cargo
-
-/target
