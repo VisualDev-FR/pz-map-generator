@@ -11,5 +11,5 @@ if %ERRORLEVEL% neq 0 (
 
 del "%LOGFILE%"
 
-build\msvc-debug\Debug\tests.exe %*
+build\mingw-debug\tests.exe %*
 

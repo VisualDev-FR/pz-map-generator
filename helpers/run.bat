@@ -7,4 +7,4 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-build\msvc-debug\Debug\pz-map-generator.exe %*
+build\mingw-debug\pz-map-generator.exe %*

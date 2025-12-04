@@ -30,6 +30,21 @@ TexturePack::Page GameFilesService::getPageByName(const std::string &name) const
     throw std::runtime_error("Page not found: " + name);
 }
 
+std::vector<std::string> GameFilesService::getPageNames() const
+{
+    std::vector<std::string> pageNames{};
+
+    for (const TexturePack &texturePack : texturePacks)
+    {
+        for (const TexturePack::Page &page : texturePack.pages)
+        {
+            pageNames.push_back(page.name);
+        }
+    }
+
+    return pageNames;
+}
+
 void GameFilesService::readTileDefinitions()
 {
     // not implemented

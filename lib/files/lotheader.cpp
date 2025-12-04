@@ -48,7 +48,7 @@ std::vector<std::string> LotHeader::readTileNames(const BytesBuffer &buffer, siz
     return tilenames;
 }
 
-std::vector<Room> LotHeader::readRooms(const BytesBuffer &buffer, size_t &offset)
+std::vector<LotHeader::Room> LotHeader::readRooms(const BytesBuffer &buffer, size_t &offset)
 {
     uint32_t roomsCount = BinaryReader::readInt32(buffer, offset);
 
@@ -76,7 +76,7 @@ std::vector<Room> LotHeader::readRooms(const BytesBuffer &buffer, size_t &offset
     return rooms;
 }
 
-std::vector<Rectangle> LotHeader::readRectangles(const BytesBuffer &buffer, size_t &offset)
+std::vector<LotHeader::Rectangle> LotHeader::readRectangles(const BytesBuffer &buffer, size_t &offset)
 {
     uint32_t rectanglesCount = BinaryReader::readInt32(buffer, offset);
 
@@ -97,7 +97,7 @@ std::vector<Rectangle> LotHeader::readRectangles(const BytesBuffer &buffer, size
     return rectangles;
 }
 
-std::vector<RoomObject> LotHeader::readRoomObjects(const BytesBuffer &buffer, size_t &offset)
+std::vector<LotHeader::RoomObject> LotHeader::readRoomObjects(const BytesBuffer &buffer, size_t &offset)
 {
     uint32_t objectsCount = BinaryReader::readInt32(buffer, offset);
 
@@ -117,7 +117,7 @@ std::vector<RoomObject> LotHeader::readRoomObjects(const BytesBuffer &buffer, si
     return roomObjects;
 }
 
-std::vector<Building> LotHeader::readBuildings(const BytesBuffer &buffer, size_t &offset)
+std::vector<LotHeader::Building> LotHeader::readBuildings(const BytesBuffer &buffer, size_t &offset)
 {
     uint32_t buildingsCount = BinaryReader::readInt32(buffer, offset);
 

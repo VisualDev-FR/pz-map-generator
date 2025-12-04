@@ -7,40 +7,40 @@
 
 #include "types.h"
 
-struct Rectangle
-{
-    uint32_t x;
-    uint32_t y;
-    uint32_t width;
-    uint32_t heigth;
-};
-
-struct RoomObject
-{
-    uint32_t room_type;
-    uint32_t x;
-    uint32_t y;
-};
-
-struct Building
-{
-    uint32_t id;
-    std::vector<uint32_t> room_ids;
-};
-
-struct Room
-{
-    uint32_t id;
-    std::string name;
-    uint32_t layer;
-    uint32_t area;
-    std::vector<Rectangle> rectangles;
-    std::vector<RoomObject> roomObjects;
-};
-
 class LotHeader
 {
 public:
+    struct Rectangle
+    {
+        uint32_t x;
+        uint32_t y;
+        uint32_t width;
+        uint32_t heigth;
+    };
+
+    struct RoomObject
+    {
+        uint32_t room_type;
+        uint32_t x;
+        uint32_t y;
+    };
+
+    struct Building
+    {
+        uint32_t id;
+        std::vector<uint32_t> room_ids;
+    };
+
+    struct Room
+    {
+        uint32_t id;
+        std::string name;
+        uint32_t layer;
+        uint32_t area;
+        std::vector<Rectangle> rectangles;
+        std::vector<RoomObject> roomObjects;
+    };
+
     std::string magic = "";
     int32_t version = 0;
     int32_t width = 0;

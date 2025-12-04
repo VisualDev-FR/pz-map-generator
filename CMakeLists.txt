@@ -9,12 +9,6 @@ set(FETCHCONTENT_BASE_DIR  "${CMAKE_SOURCE_DIR}/dependencies")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(MSVC)
-    add_compile_options(/W4 /permissive- /EHsc)
-else()
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
 # Dependencies
 find_package(fmt CONFIG REQUIRED)
 find_package(cpptrace CONFIG REQUIRED)

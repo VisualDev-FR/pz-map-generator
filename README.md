@@ -6,7 +6,8 @@ It uses Procedural Generation to build unique worlds, re-using assets of the ori
 
 ## Setup dev environnement
 
-* Install msvc, then create env variable `MSVC_HOME` at location `Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207`
+* Install [mingw64](https://github.com/niXman/mingw-builds-binaries/releases), then create env variable `MINGW64_HOME` at the root directory
+* Add `%MINGW64_HOME%/bin` to the path environnement variable
 * Intall vcpkg, then create env variable `VCPKG_HOME` at the root directory
 * Build project with [helpers/build.bat](./helpers/build.bat)
 

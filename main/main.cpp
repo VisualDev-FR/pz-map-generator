@@ -1,9 +1,7 @@
 #include <crtdbg.h>
-#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 #include <fmt/format.h>
 #include <lodepng.h>
@@ -13,14 +11,9 @@
 #include <cpptrace/from_current.hpp>
 
 #include "constants.h"
-#include "files/lotheader.h"
-#include "files/lotpack.h"
 #include "files/texturepack.h"
-#include "files/tiledefinition.h"
-#include "io/binary_reader.h"
-#include "io/file_reader.h"
-#include "math/md5.h"
 #include "services/game_files_service.h"
+#include "types.h"
 
 sf::Vector2u getPNGSize(const BytesBuffer &data)
 {
@@ -100,9 +93,25 @@ sf::Texture loadTexture(TexturePack::Page &page)
     return texture;
 }
 
+void drawSpriteOutline(sf::RenderWindow &window, sf::Sprite &sprite, TexturePack::Page &page, TexturePack::Texture *&hoveredTexture)
+{
+    sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    sf::Transform inverse = sprite.getInverseTransform();
+    sf::Vector2f local = inverse.transformPoint(mouse);
+
+    hoveredTexture = getTextureByPosition(page, local);
+
+    if (hoveredTexture != nullptr)
+    {
+        sf::RectangleShape spriteOutiline = getOutlineRectangle(hoveredTexture, sprite.getTransform());
+        window.draw(spriteOutiline);
+    }
+}
+
 void main_window()
 {
     sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "My window");
+    sf::Clock deltaClock;
 
     GameFilesService gamefileService(constants::GAME_PATH);
     TexturePack::Page page = gamefileService.getPageByName("Tiles1x1");
@@ -110,10 +119,12 @@ void main_window()
     sf::Vector2u textureSize = getPNGSize(page.png);
     sf::Texture texture = loadTexture(page);
     sf::Sprite sprite(texture);
-    const float size = 1.5f;
-    sprite.setScale({size, size});
+    const float size = 1.0f;
+    sprite.setScale({ size, size });
 
     TexturePack::Texture *hoveredTexture = nullptr;
+
+    bool firstFrame = true;
 
     while (window.isOpen())
     {
@@ -128,13 +139,6 @@ void main_window()
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Up)
                     window.close();
             }
-            else if (const auto *mouseReleased = event->getIf<sf::Event::MouseButtonReleased>())
-            {
-                if (hoveredTexture != nullptr)
-                {
-                    fmt::println("{}", hoveredTexture->name);
-                }
-            }
             else if (const auto *resized = event->getIf<sf::Event::Resized>())
             {
                 sf::FloatRect visibleArea({ 0.f, 0.f }, { static_cast<float>(resized->size.x), static_cast<float>(resized->size.y) });
@@ -142,22 +146,14 @@ void main_window()
             }
         }
 
+        // viewport drawings
         window.clear();
         window.draw(sprite);
 
-        sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-        sf::Transform inverse = sprite.getInverseTransform();
-        sf::Vector2f local = inverse.transformPoint(mouse);
-
-        hoveredTexture = getTextureByPosition(page, local);
-
-        if (hoveredTexture != nullptr)
-        {
-            sf::RectangleShape spriteOutiline = getOutlineRectangle(hoveredTexture, sprite.getTransform());
-            window.draw(spriteOutiline);
-        }
+        drawSpriteOutline(window, sprite, page, hoveredTexture);
 
         window.display();
+        firstFrame = false;
     }
 }
 
