@@ -147,7 +147,7 @@ JavaImportGroups:
 # JavaScriptWrapImports: true
 # KeepEmptyLinesAtEOF: false
 KeepEmptyLinesAtTheStartOfBlocks: false
-# LambdaBodyIndentation: Signature
+LambdaBodyIndentation: OuterScope
 # Language: Cpp
 # LineEnding: DeriveLF
 # MacroBlockBegin: ""

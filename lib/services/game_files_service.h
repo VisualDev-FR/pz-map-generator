@@ -20,8 +20,8 @@ public:
 
     GameFilesService(std::string _gamePath);
 
-    TexturePack::Page getPageByName(const std::string &name) const;
-    std::vector<std::string> getPageNames() const;
+    TexturePack::Page *getPageByName(const std::string &name);
+    std::vector<std::string> getPageNames();
 
 private:
     void readTileDefinitions();

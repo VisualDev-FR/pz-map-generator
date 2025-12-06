@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-SpriteInfoPanel::SpriteInfoPanel(tgui::Gui &gui, const TexturePack::Page &page)
+SpriteInfoPanel::SpriteInfoPanel(tgui::Gui &gui)
 {
     panel = tgui::Panel::create();
     panel->getRenderer()->setBackgroundColor(Colors::panelColor.tgui());
@@ -26,7 +26,6 @@ SpriteInfoPanel::SpriteInfoPanel(tgui::Gui &gui, const TexturePack::Page &page)
 
     pageNameLabel = tgui::Label::create();
     pageNameLabel->setSize({ "100%", "100%" });
-    pageNameLabel->setText(page.name);
     pageNameLabel->getRenderer()->setTextSize(20);
     pageNameLabel->getRenderer()->setTextColor(Colors::fontColor.tgui());
     pageNameLabel->getRenderer()->setTextStyle(tgui::TextStyle::Bold);
@@ -58,7 +57,6 @@ SpriteInfoPanel::SpriteInfoPanel(tgui::Gui &gui, const TexturePack::Page &page)
     spritesList->getScrollbar()->setScrollAmount(100);
 
     InitTextureInfo();
-    InitSpritesList(page);
 
     vLayout->add(pageNameLabel, 0.05f);
     vLayout->add(texureInfoGrid, 0.2f);
@@ -66,9 +64,21 @@ SpriteInfoPanel::SpriteInfoPanel(tgui::Gui &gui, const TexturePack::Page &page)
     vLayout->add(searchInput, 0.025f);
     vLayout->addSpace(0.01f);
     vLayout->add(spritesList);
+    vLayout->setVisible(false);
 
     panel->add(vLayout);
     gui.add(panel);
+}
+
+void SpriteInfoPanel::setPage(const TexturePack::Page *page)
+{
+    vLayout->setVisible(page != nullptr);
+
+    if (page != nullptr)
+    {
+        pageNameLabel->setText(page->name);
+        InitSpritesList(page);
+    }
 }
 
 void SpriteInfoPanel::onFilterChange(tgui::String keyword)
@@ -116,11 +126,13 @@ void SpriteInfoPanel::InitTextureInfo()
     }
 }
 
-void SpriteInfoPanel::InitSpritesList(const TexturePack::Page &page)
+void SpriteInfoPanel::InitSpritesList(const TexturePack::Page *page)
 {
     spriteNames = std::vector<tgui::String>();
 
-    for (const auto &texture : page.textures)
+    spritesList->removeAllItems();
+
+    for (const auto &texture : page->textures)
     {
         spriteNames.push_back(texture.name);
         spritesList->addItem(texture.name);
@@ -129,7 +141,7 @@ void SpriteInfoPanel::InitSpritesList(const TexturePack::Page &page)
     spritesList->getScrollbar()->setValue(0);
 }
 
-void SpriteInfoPanel::update(sf::RenderWindow &window, TexturePack::Texture *texture)
+void SpriteInfoPanel::update(sf::RenderWindow &window, const TexturePack::Page *page, const TexturePack::Texture *texture)
 {
     auto winsize = window.getSize();
     panel->setSize(250, winsize.y);

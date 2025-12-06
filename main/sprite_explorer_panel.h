@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <vector>
 
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -27,7 +28,8 @@ public:
     SpriteExplorerPanel(tgui::Gui &gui, GameFilesService &gameFilesService);
 
     void onItemSelect(const std::vector<tgui::String> &selectedItem);
-    void onFilterChange(const tgui::String &selectedItem);
+    void onFilterChange(const tgui::String &keyword);
+    void onPageSelect(std::function<void(const tgui::String &pageName)>);
     void InitTilesTree(GameFilesService &gameFilesService);
     void update(const sf::RenderWindow &window);
 };

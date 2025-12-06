@@ -42,7 +42,6 @@ SpriteExplorerPanel::SpriteExplorerPanel(tgui::Gui &gui, GameFilesService &gameF
     tilesTree->getRenderer()->setSelectedBackgroundColorHover(Colors::selectedItem.tgui());
     tilesTree->getRenderer()->setTextColorHover(Colors::fontColor.tgui());
     tilesTree->getHorizontalScrollbar()->setPolicy(tgui::Scrollbar::Policy::Never);
-    tilesTree->onItemSelect(&SpriteExplorerPanel::onItemSelect, this);
 
     InitTilesTree(gameFilesService);
 
@@ -51,6 +50,11 @@ SpriteExplorerPanel::SpriteExplorerPanel(tgui::Gui &gui, GameFilesService &gameF
     vlayout->add(tilesTree);
     panel->add(vlayout);
     gui.add(panel);
+}
+
+void SpriteExplorerPanel::onPageSelect(std::function<void(const tgui::String &pageName)> func)
+{
+    tilesTree->onItemSelect(func);
 }
 
 void SpriteExplorerPanel::onFilterChange(const tgui::String &keyword)
@@ -83,14 +87,6 @@ void SpriteExplorerPanel::onFilterChange(const tgui::String &keyword)
         {
             tilesTree->removeItem(node);
         }
-    }
-}
-
-void SpriteExplorerPanel::onItemSelect(const std::vector<tgui::String> &selectedItem)
-{
-    if (selectedItem.size() > 1)
-    {
-        fmt::println("selected: {} / {}", selectedItem[0].toStdString(), selectedItem[1].toStdString());
     }
 }
 

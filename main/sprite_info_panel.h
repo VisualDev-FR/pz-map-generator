@@ -36,14 +36,15 @@ private:
     const std::vector<std::string> names = { "name", "x", "y", "width", "height", "ox", "oy", "ow", "oh" };
 
 public:
-    SpriteInfoPanel(tgui::Gui &gui, const TexturePack::Page &page);
+    SpriteInfoPanel(tgui::Gui &gui);
 
-    void update(sf::RenderWindow &window, TexturePack::Texture *texture);
+    void update(sf::RenderWindow &window, const TexturePack::Page *page, const TexturePack::Texture *texture);
 
     void InitTextureInfo();
-    void InitSpritesList(const TexturePack::Page &page);
+    void InitSpritesList(const TexturePack::Page *page);
 
     void onTextureSelect(std::function<void(tgui::String)> func);
     void onFilterChange(tgui::String keyword);
     void setItemSelected(std::string itemName);
+    void setPage(const TexturePack::Page *page);
 };

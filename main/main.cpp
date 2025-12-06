@@ -1,4 +1,7 @@
 #include <crtdbg.h>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -26,6 +29,7 @@
 #include "services/game_files_service.h"
 #include "sprite_explorer_panel.h"
 #include "sprite_info_panel.h"
+#include "theme.h"
 
 sf::Vector2u getPNGSize(const BytesBuffer &data)
 {
@@ -43,15 +47,18 @@ sf::Vector2u getPNGSize(const BytesBuffer &data)
     return sf::Vector2u{ width, height };
 }
 
-TexturePack::Texture *getTextureByName(TexturePack::Page &page, std::string textureName)
+TexturePack::Texture *getTextureByName(TexturePack::Page *page, std::string textureName)
 {
+    if (page == nullptr)
+        return nullptr;
+
     TexturePack::Texture *textureData = nullptr;
 
-    for (int i = 0; i < page.textures.size(); i++)
+    for (int i = 0; i < page->textures.size(); i++)
     {
-        if (page.textures[i].name == textureName)
+        if (page->textures[i].name == textureName)
         {
-            textureData = &page.textures[i];
+            textureData = &page->textures[i];
             break;
         }
     }
@@ -59,31 +66,19 @@ TexturePack::Texture *getTextureByName(TexturePack::Page &page, std::string text
     return textureData;
 }
 
-TexturePack::Texture *getTextureByPosition(TexturePack::Page &page, sf::Vector2f pos)
+TexturePack::Texture *getTextureByPosition(TexturePack::Page *page, sf::Vector2f pos)
 {
-    for (int i = 0; i < page.textures.size(); i++)
+    for (int i = 0; i < page->textures.size(); i++)
     {
-        TexturePack::Texture text = page.textures[i];
+        TexturePack::Texture text = page->textures[i];
 
         if (pos.x >= text.x && pos.y >= text.y && pos.x < text.x + text.width && pos.y < text.y + text.height)
         {
-            return &page.textures[i];
+            return &page->textures[i];
         }
     }
 
     return nullptr;
-}
-
-sf::Texture loadTexture(TexturePack::Page &page)
-{
-    sf::Texture texture;
-
-    if (!texture.loadFromMemory(page.png.data(), page.png.size()))
-    {
-        throw std::runtime_error("Erreur : Échec du chargement de la texture depuis le buffer PNG.");
-    }
-
-    return texture;
 }
 
 sf::RectangleShape getOutlineRectangle(TexturePack::Texture *textureData, sf::Transform transform)
@@ -103,7 +98,7 @@ sf::RectangleShape getOutlineRectangle(TexturePack::Texture *textureData, sf::Tr
     return rectangle;
 }
 
-void drawSpriteOutline(sf::RenderWindow &window, sf::Sprite &sprite, TexturePack::Page &page, TexturePack::Texture *&hoveredTexture)
+void drawSpriteOutline(sf::RenderWindow &window, sf::Sprite &sprite, TexturePack::Page *page, TexturePack::Texture *&hoveredTexture)
 {
     sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     sf::Transform inverse = sprite.getInverseTransform();
@@ -122,35 +117,59 @@ void drawSpriteOutline(sf::RenderWindow &window, sf::Sprite &sprite, TexturePack
     }
 }
 
+void updateSpriteTexture(sf::Sprite &sprite, sf::Texture &texture, TexturePack::Page *page, const sf::RenderWindow &window)
+{
+    sf::Vector2u textureSize = getPNGSize(page->png);
+
+    if (!texture.loadFromMemory(page->png.data(), page->png.size()))
+    {
+        throw std::runtime_error("Erreur : Échec du chargement de la texture depuis le buffer PNG.");
+    }
+
+    sprite.setTexture(texture, true);
+    sf::FloatRect bounds = sprite.getLocalBounds();
+    sprite.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
+}
+
 void main_window()
 {
     sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "PZ Map Generator");
     sf::Vector2u winsize = window.getSize();
     sf::Clock deltaClock;
 
+    window.setFramerateLimit(60);
+
+    sf::Texture texture;
+    sf::Sprite sprite(texture);
+
     platform::windows::setWindowDarkMode(window);
 
     GameFilesService gamefileService(constants::GAME_PATH);
-    TexturePack::Page page = gamefileService.getPageByName("Tiles1x1");
 
-    sf::Vector2u textureSize = getPNGSize(page.png);
-    sf::Texture texture = loadTexture(page);
-    sf::Sprite sprite(texture);
-    sf::FloatRect bounds = sprite.getLocalBounds();
-    const float size = 1.0f;
-    sprite.setScale({ size, size });
-    sprite.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
-    sprite.setPosition({ winsize.x / 2.f, winsize.y / 2.f });
-
+    TexturePack::Page *currentPage = nullptr;
     TexturePack::Texture *hoveredTexture = nullptr;
 
     tgui::Gui gui{ window };
 
     SpriteExplorerPanel spriteExplorer(gui, gamefileService);
-    SpriteInfoPanel spritePanel(gui, page);
+    SpriteInfoPanel spriteInfoPanel(gui);
 
-    spritePanel.onTextureSelect([&](const tgui::String &item)
-        { hoveredTexture = getTextureByName(page, item.toStdString()); });
+    spriteExplorer.onPageSelect([&](const tgui::String &pageName)
+    {
+        currentPage = gamefileService.getPageByName(pageName.toStdString());
+
+        if (currentPage != nullptr)
+        {
+            updateSpriteTexture(sprite, texture, currentPage, window);
+            spriteInfoPanel.setPage(currentPage);
+            hoveredTexture = nullptr;
+        }
+    });
+
+    spriteInfoPanel.onTextureSelect([&](const tgui::String &item)
+    {
+        hoveredTexture = getTextureByName(currentPage, item.toStdString());
+    });
 
     while (window.isOpen())
     {
@@ -162,19 +181,29 @@ void main_window()
             {
                 window.close();
             }
+            else if (const auto *resized = event->getIf<sf::Event::Resized>())
+            {
+                sf::FloatRect visibleArea({ 0.f, 0.f }, { static_cast<float>(resized->size.x), static_cast<float>(resized->size.y) });
+                window.setView(sf::View(visibleArea));
+            }
         }
 
         // viewport drawings
-        window.clear(sf::Color(33, 38, 46));
+        window.clear(Colors::backgroundColor.sfml());
 
-        window.draw(sprite);
-        drawSpriteOutline(window, sprite, page, hoveredTexture);
+        if (currentPage != nullptr)
+        {
+            window.draw(sprite);
+            drawSpriteOutline(window, sprite, currentPage, hoveredTexture);
+        }
+
+        sprite.setPosition({ window.getSize().x / 2.f, window.getSize().y / 2.f });
 
         // ui drawing
-        spritePanel.update(window, hoveredTexture);
+        spriteInfoPanel.update(window, currentPage, hoveredTexture);
         spriteExplorer.update(window);
-        gui.draw();
 
+        gui.draw();
         window.display();
     }
 }

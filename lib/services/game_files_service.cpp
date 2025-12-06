@@ -1,8 +1,8 @@
+#include <fmt/format.h>
 #include <filesystem>
 
-#include <fmt/format.h>
-
 #include "constants.h"
+#include "files/texturepack.h"
 #include "game_files_service.h"
 
 namespace fs = std::filesystem;
@@ -13,23 +13,23 @@ GameFilesService::GameFilesService(std::string _gamePath) : gamePath(_gamePath)
     readTexturePacks();
 }
 
-TexturePack::Page GameFilesService::getPageByName(const std::string &name) const
+TexturePack::Page *GameFilesService::getPageByName(const std::string &name)
 {
-    for (const TexturePack &texturePack : texturePacks)
+    for (TexturePack &texturePack : texturePacks)
     {
-        for (const TexturePack::Page &page : texturePack.pages)
+        for (TexturePack::Page &page : texturePack.pages)
         {
             if (page.name == name)
             {
-                return page;
+                return &page;
             }
         }
     }
 
-    throw std::runtime_error("Page not found: " + name);
+    return nullptr;
 }
 
-std::vector<std::string> GameFilesService::getPageNames() const
+std::vector<std::string> GameFilesService::getPageNames()
 {
     std::vector<std::string> pageNames{};
 
