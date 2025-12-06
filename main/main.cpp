@@ -1,24 +1,24 @@
 #include <crtdbg.h>
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/View.hpp>
-#include <SFML/System/Vector2.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
-#include <fmt/base.h>
-#include <fmt/format.h>
-#include <lodepng.h>
-#include <cpptrace/from_current.hpp>
-
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/View.hpp>
 #include <SFML/System.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Window/WindowEnums.hpp>
 
+#include "TGUI/String.hpp"
 #include <TGUI/Backend/SFML-Graphics.hpp>
 #include <TGUI/TGUI.hpp>
+
+#include <fmt/format.h>
+#include <lodepng.h>
+#include <cpptrace/from_current.hpp>
 
 #include "constants.h"
 #include "files/texturepack.h"
@@ -26,7 +26,6 @@
 #include "services/game_files_service.h"
 #include "sprite_explorer_panel.h"
 #include "sprite_info_panel.h"
-
 
 sf::Vector2u getPNGSize(const BytesBuffer &data)
 {
@@ -55,11 +54,6 @@ TexturePack::Texture *getTextureByName(TexturePack::Page &page, std::string text
             textureData = &page.textures[i];
             break;
         }
-    }
-
-    if (textureData == nullptr)
-    {
-        throw std::runtime_error("texture not found");
     }
 
     return textureData;
@@ -114,8 +108,12 @@ void drawSpriteOutline(sf::RenderWindow &window, sf::Sprite &sprite, TexturePack
     sf::Vector2f mouse = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     sf::Transform inverse = sprite.getInverseTransform();
     sf::Vector2f local = inverse.transformPoint(mouse);
+    sf::FloatRect bounds = sprite.getLocalBounds();
 
-    hoveredTexture = getTextureByPosition(page, local);
+    if (bounds.contains(local))
+    {
+        hoveredTexture = getTextureByPosition(page, local);
+    }
 
     if (hoveredTexture != nullptr)
     {
@@ -149,7 +147,10 @@ void main_window()
     tgui::Gui gui{ window };
 
     SpriteExplorerPanel spriteExplorer(gui, gamefileService);
-    SpritePanel spritePanel(gui);
+    SpriteInfoPanel spritePanel(gui, page);
+
+    spritePanel.onTextureSelect([&](const tgui::String &item)
+        { hoveredTexture = getTextureByName(page, item.toStdString()); });
 
     while (window.isOpen())
     {

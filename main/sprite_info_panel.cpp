@@ -1,17 +1,103 @@
 #include "sprite_info_panel.h"
+#include "TGUI/Color.hpp"
+#include "TGUI/Cursor.hpp"
+#include "TGUI/Layout.hpp"
+#include "TGUI/Outline.hpp"
+#include "TGUI/String.hpp"
+#include "TGUI/TextStyle.hpp"
+#include "TGUI/Widgets/EditBox.hpp"
+#include "TGUI/Widgets/Grid.hpp"
+#include "TGUI/Widgets/Label.hpp"
+#include "TGUI/Widgets/ListBox.hpp"
+#include "TGUI/Widgets/VerticalLayout.hpp"
+#include "files/texturepack.h"
 #include "theme.h"
+#include <fmt/base.h>
+#include <string>
+#include <vector>
 
-SpritePanel::SpritePanel(tgui::Gui &gui)
+SpriteInfoPanel::SpriteInfoPanel(tgui::Gui &gui, const TexturePack::Page &page)
 {
     panel = tgui::Panel::create();
     panel->getRenderer()->setBackgroundColor(Colors::panelColor.tgui());
+    panel->getRenderer()->setPadding(tgui::Padding(5));
 
-    grid = tgui::Grid::create();
-    grid->setSize(panel->getSize());
+    vLayout = tgui::VerticalLayout::create();
 
-    panel->add(grid);
+    pageNameLabel = tgui::Label::create();
+    pageNameLabel->setSize({ "100%", "100%" });
+    pageNameLabel->setText(page.name);
+    pageNameLabel->getRenderer()->setTextSize(20);
+    pageNameLabel->getRenderer()->setTextColor(Colors::fontColor.tgui());
+    pageNameLabel->getRenderer()->setTextStyle(tgui::TextStyle::Bold);
+    pageNameLabel->setHorizontalAlignment(tgui::HorizontalAlignment::Center);
+
+    texureInfoGrid = tgui::Grid::create();
+    texureInfoGrid->setSize({ "100%", "100%" });
+
+    searchInput = tgui::EditBox::create();
+    searchInput->setSize({ "100%", "100%" });
+    searchInput->setDefaultText("Filter sprite names");
+    searchInput->setMouseCursor(tgui::Cursor::Type::Text);
+    searchInput->getRenderer()->setBackgroundColor(Colors::buttonColor.tgui());
+    searchInput->getRenderer()->setBackgroundColorHover(Colors::buttonColor.tgui());
+    searchInput->getRenderer()->setTextColor(Colors::fontColor.tgui());
+    searchInput->getRenderer()->setCaretColor(Colors::fontColor.tgui());
+    searchInput->getRenderer()->setCaretColor(Colors::fontColor.tgui());
+    searchInput->onTextChange(&SpriteInfoPanel::onFilterChange, this);
+
+    spritesList = tgui::ListBox::create();
+    spritesList->setSize({ "100%", "100%" });
+    spritesList->getRenderer()->setBorderColor(tgui::Color::Transparent);
+    spritesList->getRenderer()->setBackgroundColor(tgui::Color::Transparent);
+    spritesList->getRenderer()->setBackgroundColorHover(Colors::hoveredItem.tgui());
+    spritesList->getRenderer()->setSelectedBackgroundColor(Colors::selectedItem.tgui());
+    spritesList->getRenderer()->setSelectedBackgroundColorHover(Colors::selectedItem.tgui());
+    spritesList->getRenderer()->setTextColor(Colors::fontColor.tgui());
+    spritesList->getRenderer()->setTextColorHover(Colors::fontColor.tgui());
+    spritesList->getScrollbar()->setScrollAmount(100);
+
+    InitTextureInfo();
+    InitSpritesList(page);
+
+    vLayout->add(pageNameLabel, 0.05f);
+    vLayout->add(texureInfoGrid, 0.2f);
+    vLayout->addSpace(0.01f);
+    vLayout->add(searchInput, 0.025f);
+    vLayout->addSpace(0.01f);
+    vLayout->add(spritesList);
+
+    panel->add(vLayout);
     gui.add(panel);
+}
 
+void SpriteInfoPanel::onFilterChange(tgui::String keyword)
+{
+    spritesList->removeAllItems();
+
+    for (const auto &spriteName : spriteNames)
+    {
+        if (keyword == "" || spriteName.toLower().contains(keyword.toLower()))
+        {
+            spritesList->addItem(spriteName);
+        }
+    }
+
+    spritesList->getScrollbar()->setValue(0);
+}
+
+void SpriteInfoPanel::setItemSelected(std::string itemName)
+{
+    spritesList->setSelectedItem(itemName);
+}
+
+void SpriteInfoPanel::onTextureSelect(std::function<void(tgui::String)> func)
+{
+    spritesList->onItemSelect(func);
+}
+
+void SpriteInfoPanel::InitTextureInfo()
+{
     int row = 0;
     for (const auto &key : names)
     {
@@ -23,14 +109,27 @@ SpritePanel::SpritePanel(tgui::Gui &gui)
 
         fields[key] = labelValue;
 
-        grid->addWidget(labelTitle, row, 0, tgui::Grid::Alignment::Right);
-        grid->addWidget(labelValue, row, 1, tgui::Grid::Alignment::Left);
+        texureInfoGrid->addWidget(labelTitle, row, 0, tgui::Grid::Alignment::Right);
+        texureInfoGrid->addWidget(labelValue, row, 1, tgui::Grid::Alignment::Left);
 
         row++;
     }
 }
 
-void SpritePanel::update(sf::RenderWindow &window, TexturePack::Texture *texture)
+void SpriteInfoPanel::InitSpritesList(const TexturePack::Page &page)
+{
+    spriteNames = std::vector<tgui::String>();
+
+    for (const auto &texture : page.textures)
+    {
+        spriteNames.push_back(texture.name);
+        spritesList->addItem(texture.name);
+    }
+
+    spritesList->getScrollbar()->setValue(0);
+}
+
+void SpriteInfoPanel::update(sf::RenderWindow &window, TexturePack::Texture *texture)
 {
     auto winsize = window.getSize();
     panel->setSize(250, winsize.y);
@@ -38,11 +137,11 @@ void SpritePanel::update(sf::RenderWindow &window, TexturePack::Texture *texture
 
     if (texture == nullptr)
     {
-        grid->setVisible(false);
+        texureInfoGrid->setVisible(false);
         return;
     }
 
-    grid->setVisible(true);
+    texureInfoGrid->setVisible(true);
 
     fields["name"]->setText(texture->name);
     fields["x"]->setText(std::to_string(texture->x));

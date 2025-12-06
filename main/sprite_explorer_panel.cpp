@@ -23,6 +23,8 @@ SpriteExplorerPanel::SpriteExplorerPanel(tgui::Gui &gui, GameFilesService &gameF
 
     searchInput = tgui::EditBox::create();
     searchInput->setSize({ "100%", "100%" });
+    searchInput->setDefaultText("Filter page names");
+    searchInput->setMouseCursor(tgui::Cursor::Type::Text);
     searchInput->getRenderer()->setBackgroundColor(Colors::buttonColor.tgui());
     searchInput->getRenderer()->setBackgroundColorHover(Colors::buttonColor.tgui());
     searchInput->getRenderer()->setTextColor(Colors::fontColor.tgui());
