@@ -13,7 +13,7 @@
 #include "sprite_explorer_panel.h"
 #include "theme.h"
 
-SpriteExplorerPanel::SpriteExplorerPanel(tgui::Gui &gui, GameFilesService &gameFilesService)
+SpriteExplorerPanel::SpriteExplorerPanel(tgui::Gui &gui, const GameFilesService &gameFilesService)
 {
     panel = tgui::Panel::create();
     panel->getRenderer()->setBackgroundColor(Colors::panelColor.tgui());
@@ -91,7 +91,7 @@ void SpriteExplorerPanel::onFilterChange(const tgui::String &keyword)
     }
 }
 
-void SpriteExplorerPanel::InitTilesTree(GameFilesService &gameFilesService)
+void SpriteExplorerPanel::InitTilesTree(const GameFilesService &gameFilesService)
 {
     treeNodes = std::vector<std::vector<tgui::String>>();
 

@@ -25,11 +25,11 @@ private:
     std::vector<std::vector<tgui::String>> treeNodes;
 
 public:
-    SpriteExplorerPanel(tgui::Gui &gui, GameFilesService &gameFilesService);
+    SpriteExplorerPanel(tgui::Gui &gui, const GameFilesService &gameFilesService);
 
     void onItemSelect(const std::vector<tgui::String> &selectedItem);
     void onFilterChange(const tgui::String &keyword);
     void onPageSelect(std::function<void(const tgui::String &pageName)>);
-    void InitTilesTree(GameFilesService &gameFilesService);
+    void InitTilesTree(const GameFilesService &gameFilesService);
     void update(const sf::RenderWindow &window);
 };
