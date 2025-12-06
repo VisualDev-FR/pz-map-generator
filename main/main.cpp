@@ -9,49 +9,24 @@
 #include <fmt/base.h>
 #include <fmt/format.h>
 #include <lodepng.h>
+#include <cpptrace/from_current.hpp>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Window/WindowEnums.hpp>
+
 #include <TGUI/Backend/SFML-Graphics.hpp>
 #include <TGUI/TGUI.hpp>
-#include <cpptrace/from_current.hpp>
 
-#include "TGUI/Color.hpp"
-#include "TGUI/Widgets/Panel.hpp"
 #include "constants.h"
 #include "files/texturepack.h"
+#include "platform.h"
 #include "services/game_files_service.h"
 #include "sprite_explorer_panel.h"
 #include "sprite_info_panel.h"
 
-#include <dwmapi.h>
-#include <windows.h>
-
-WNDPROC g_originalProc = nullptr;
-
-LRESULT CALLBACK CustomWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    return CallWindowProcA(g_originalProc, hwnd, msg, wParam, lParam);
-}
-
-void setWindowDarkMode(const sf::RenderWindow &window)
-{
-    HWND hwnd = reinterpret_cast<HWND>(window.getNativeHandle());
-
-    g_originalProc = reinterpret_cast<WNDPROC>(
-        SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)CustomWndProc));
-
-    BOOL dark = TRUE;
-    DwmSetWindowAttribute(hwnd, 20, &dark, sizeof(dark));
-    DwmSetWindowAttribute(hwnd, 19, &dark, sizeof(dark));
-
-    ShowWindow(hwnd, SW_MINIMIZE);
-    ShowWindow(hwnd, SW_RESTORE);
-
-    SendMessageW(hwnd, WM_NCACTIVATE, TRUE, 0);
-}
 
 sf::Vector2u getPNGSize(const BytesBuffer &data)
 {
@@ -155,7 +130,7 @@ void main_window()
     sf::Vector2u winsize = window.getSize();
     sf::Clock deltaClock;
 
-    setWindowDarkMode(window);
+    platform::windows::setWindowDarkMode(window);
 
     GameFilesService gamefileService(constants::GAME_PATH);
     TexturePack::Page page = gamefileService.getPageByName("Tiles1x1");
@@ -171,16 +146,10 @@ void main_window()
 
     TexturePack::Texture *hoveredTexture = nullptr;
 
-    bool firstFrame = true;
-
     tgui::Gui gui{ window };
 
-    auto explorerPanel = tgui::Panel::create();
-    explorerPanel->getRenderer()->setBackgroundColor(tgui::Color(54, 61, 74));
-    gui.add(explorerPanel);
-
-    auto spritePanel = SpritePanel(gui);
-    auto spriteExplorer = SpriteExplorerPanel(gui, gamefileService);
+    SpriteExplorerPanel spriteExplorer(gui, gamefileService);
+    SpritePanel spritePanel(gui);
 
     while (window.isOpen())
     {
@@ -192,27 +161,20 @@ void main_window()
             {
                 window.close();
             }
-            // else if (const auto *resized = event->getIf<sf::Event::Resized>())
-            // {
-            //     sf::FloatRect visibleArea({ 0.f, 0.f }, { static_cast<float>(resized->size.x), static_cast<float>(resized->size.y) });
-            //     window.setView(sf::View(visibleArea));
-            // }
         }
 
         // viewport drawings
         window.clear(sf::Color(33, 38, 46));
+
         window.draw(sprite);
         drawSpriteOutline(window, sprite, page, hoveredTexture);
 
-        explorerPanel->setSize(250, winsize.y);
-        explorerPanel->setPosition(0, 0);
-
+        // ui drawing
         spritePanel.update(window, hoveredTexture);
         spriteExplorer.update(window);
-
         gui.draw();
+
         window.display();
-        firstFrame = false;
     }
 }
 
