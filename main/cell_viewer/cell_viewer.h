@@ -27,6 +27,29 @@
 #include <fmt/base.h>
 #include <fmt/format.h>
 
+namespace FastMath
+{
+    int fastMin(int a, int b)
+    {
+        if (a < b) return a;
+        return b;
+    }
+
+    int fastMax(int a, int b)
+    {
+        if (a > b) return a;
+        return b;
+    }
+
+    float fastClamp(float value, float min, float max)
+    {
+        if (value <= min) return min;
+        if (value >= max) return max;
+
+        return value;
+    }
+}
+
 struct ViewState
 {
     sf::Vector2i lastMousePos;
@@ -36,18 +59,10 @@ struct ViewState
 
     void applyTo(sf::View &view, sf::RenderWindow &window)
     {
-        zoomLevel = fastClamp(zoomLevel, 0.2f, 4.f);
+        zoomLevel = FastMath::fastClamp(zoomLevel, 0.05f, 10.f);
 
         view.setSize({ window.getSize().x * zoomLevel, window.getSize().y * zoomLevel });
         view.setCenter(center);
-    }
-
-    float fastClamp(float value, float min, float max)
-    {
-        if (value <= min) return min;
-        if (value >= max) return max;
-
-        return value;
     }
 };
 
@@ -66,6 +81,7 @@ public:
     sf::View *view;
 
     bool firstFrame = true;
+    int currentLayer = 2;
 
     CellViewer(sf::View *view, MapFilesService *mapFileService, TilesheetService *tilesheetService, int x, int y)
     {
@@ -189,6 +205,18 @@ public:
                 viewState.lastMousePos = mouseMove->position;
             }
         }
+
+        if (const auto *keyPressed = event.getIf<sf::Event::KeyPressed>())
+        {
+            if (keyPressed->code == sf::Keyboard::Key::Up)
+            {
+                currentLayer = FastMath::fastMin(currentLayer + 1, lotheader.maxLayer + 1);
+            }
+            else if (keyPressed->code == sf::Keyboard::Key::Down)
+            {
+                currentLayer = FastMath::fastMax(currentLayer - 1, lotheader.minLayer + 1);
+            }
+        }
     }
 
     void update(sf::RenderWindow &window)
@@ -201,7 +229,7 @@ public:
 
         for (auto &square : lotpack.squareMap)
         {
-            if (square.coord.z() != 2)
+            if (square.coord.z() > currentLayer)
                 continue;
 
             int chunkX = square.coord.chunk_idx() / constants::CELL_SIZE_IN_BLOCKS;
