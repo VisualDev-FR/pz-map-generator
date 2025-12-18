@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dwmapi.h>
+#include <psapi.h>
 #include <windows.h>
 
 #include <SFML/Graphics.hpp>
@@ -30,6 +31,18 @@ namespace platform::windows
         ShowWindow(hwnd, SW_RESTORE);
 
         SendMessageW(hwnd, WM_NCACTIVATE, TRUE, 0);
+    }
+
+    inline size_t getMemoryUsage()
+    {
+        PROCESS_MEMORY_COUNTERS pmc;
+
+        if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
+        {
+            return pmc.WorkingSetSize;
+        }
+
+        return 0;
     }
 
 }
