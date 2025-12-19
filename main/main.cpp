@@ -35,7 +35,7 @@ void main_window()
     MapFilesService mapFileService(constants::GAME_PATH, MapNames::Muldraugh);
 
     // TilesBrowser tilesBrowser(gui, window, tilesheetService);
-    CellViewer cellViewer(&view, &mapFileService, &tilesheetService, 32, 45);
+    CellViewer cellViewer(&view, &mapFileService, &tilesheetService, gui, 32, 45);
 
     while (window.isOpen())
     {

@@ -8,11 +8,14 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <vector>
 
+#include "TGUI/Backend/SFML-Graphics.hpp"
 #include "files/lotheader.h"
 #include "files/lotpack.h"
 #include "math/math.h"
 #include "services/map_files_service.h"
 #include "services/tilesheet_service.h"
+
+#include "gui/components/debug_panel.h"
 
 class CellViewer
 {
@@ -53,8 +56,11 @@ public:
 
     bool firstFrame = true;
     int currentLayer = 2;
+    float framerate = 0;
 
-    CellViewer(sf::View *view, MapFilesService *mapFileService, TilesheetService *tilesheetService, int x, int y);
+    DebugPanel debugPanel;
+
+    CellViewer(sf::View *view, MapFilesService *mapFileService, TilesheetService *tilesheetService, tgui::Gui &gui, int x, int y);
 
     sf::Texture *getOrCreateTexture(const std::string &textureName);
     sf::Sprite createSprite(TexturePack::Texture *textureData);

@@ -3,12 +3,18 @@
 #include <fmt/base.h>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <cstdint>
 #include <optional>
+#include <unordered_set>
 #include <vector>
 
+#include "TGUI/Backend/SFML-Graphics.hpp"
 #include "constants.h"
+#include "timer.h"
+#include "gui/components/debug_panel.h"
 
-CellViewer::CellViewer(sf::View *view, MapFilesService *mapFileService, TilesheetService *tilesheetService, int x, int y)
+CellViewer::CellViewer(sf::View *view, MapFilesService *mapFileService, TilesheetService *tilesheetService, tgui::Gui &gui, int x, int y) :
+        debugPanel(gui)
 {
     this->lotheader = mapFileService->LoadLotheaderByPosition(x, y);
     this->lotpack = mapFileService->LoadLotpackByPosition(x, y, &lotheader);
@@ -30,6 +36,8 @@ void CellViewer::preComputeSprites()
     const float TILE_WIDTH = 128.0f;
     const float TILE_HEIGHT = 64.0f;
 
+    std::unordered_set<int32_t> uniqueSprites = {};
+
     for (auto &square : lotpack.squareMap)
     {
         int chunkX = square.coord.chunk_idx() / constants::CELL_SIZE_IN_BLOCKS;
@@ -42,13 +50,19 @@ void CellViewer::preComputeSprites()
         float screenX = (gx - gy) * (TILE_WIDTH / 2.0f);
         float screenY = (gx + gy) * (TILE_HEIGHT / 2.0f) - gz * (TILE_HEIGHT * 3.0f);
 
-        for (auto &spriteId : square.tiles)
+        for (int32_t &spriteId : square.tiles)
         {
             std::string &spriteName = lotheader.tileNames[spriteId];
             TexturePack::Texture *textureData = tilesheetService->getTextureByName(spriteName);
 
             if (textureData == nullptr)
                 continue;
+
+            if (!uniqueSprites.contains(spriteId))
+            {
+                uniqueSprites.insert(spriteId);
+                fmt::println("{},{},{}", textureData->name, textureData->width, textureData->height);
+            }
 
             sf::Sprite sprite = createSprite(textureData);
 
@@ -62,6 +76,8 @@ void CellViewer::preComputeSprites()
             renderTiles.push_back({ square.coord.z(), sprite });
         }
     }
+
+    fmt::println("unique sprite: {}", uniqueSprites.size());
 }
 
 sf::Texture *CellViewer::getOrCreateTexture(const std::string &textureName)
@@ -164,6 +180,8 @@ void CellViewer::update(sf::RenderWindow &window)
     viewState.applyTo(*view, window);
     window.setView(*view);
 
+    Timer timer = Timer::start();
+
     for (auto &renderTile : renderTiles)
     {
         if (renderTile.layer <= currentLayer)
@@ -173,4 +191,6 @@ void CellViewer::update(sf::RenderWindow &window)
     }
 
     firstFrame = false;
+
+    debugPanel.setFPS(1000 / timer.elapsedMiliseconds());
 }
