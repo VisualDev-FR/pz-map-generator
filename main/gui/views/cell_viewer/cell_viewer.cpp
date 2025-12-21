@@ -34,9 +34,10 @@ CellViewer::CellViewer(sf::View *view, MapFilesService *mapFileService, Tileshee
     this->lotheader = mapFileService->LoadLotheaderByPosition(x, y);
     this->lotpack = mapFileService->LoadLotpackByPosition(x, y, &lotheader);
     this->tilesheetService = tilesheetService;
-
-    this->viewState = ViewState();
     this->view = view;
+
+    this->viewState.currentLayer = lotheader.maxLayer;
+    this->viewState.center = { .0f, 128.f * 64 };
 
     packCellSprites();
     preComputeSprites();

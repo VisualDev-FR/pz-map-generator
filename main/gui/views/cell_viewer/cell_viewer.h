@@ -27,16 +27,16 @@ private:
     {
         sf::Clock clock;
         sf::Vector2i lastMousePos;
-        sf::Vector2f center = { .0f, .0f };
+        sf::Vector2f center;
 
-        float zoomLevel = 1.0f;
+        float zoomLevel = 10.0f;
         bool isDragging = false;
         bool firstFrame = true;
-        int currentLayer = 2;
+        int currentLayer = 32;
 
         void applyTo(sf::View &view, sf::RenderWindow &window)
         {
-            zoomLevel = Math::fastClamp(zoomLevel, 0.05f, 10.f);
+            zoomLevel = Math::fastClamp(zoomLevel, 0.05f, 50.f);
 
             view.setSize({ window.getSize().x * zoomLevel, window.getSize().y * zoomLevel });
             view.setCenter(center);
