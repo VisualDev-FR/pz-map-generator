@@ -11,11 +11,13 @@ class DebugPanel
 private:
     tgui::Panel::Ptr panel;
     tgui::Label::Ptr fpsLabel;
+    tgui::Label::Ptr timerLabel;
     tgui::Label::Ptr drawCallsLabel;
 
 public:
     DebugPanel(tgui::Gui &gui);
 
     void setFPS(float value);
+    void setTimer(float value);
     void setDrawCalls(int value);
 };

@@ -1,13 +1,15 @@
 #pragma once
 
-#include <SFML/Graphics/Texture.hpp>
-#include <cstdint>
+#include <SFML/System/Clock.hpp>
+#include <vector>
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
-#include <vector>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
 
 #include "TGUI/Backend/SFML-Graphics.hpp"
+
 #include "algorithms/rect_pack/rect_structs.h"
 #include "files/lotheader.h"
 #include "files/lotpack.h"
@@ -23,8 +25,10 @@ class CellViewer
 private:
     struct ViewState
     {
+        sf::Clock clock;
         sf::Vector2i lastMousePos;
         sf::Vector2f center = { .0f, .0f };
+
         float zoomLevel = 1.0f;
         bool isDragging = false;
         bool firstFrame = true;
@@ -39,12 +43,6 @@ private:
         }
     };
 
-    struct RenderTile
-    {
-        int8_t layer;
-        sf::Sprite sprite;
-    };
-
     LotHeader lotheader;
     Lotpack lotpack;
 
@@ -52,9 +50,9 @@ private:
 
     ViewState viewState;
     sf::View *view;
-    std::vector<RenderTile> renderTiles;
 
     sf::Texture atlasTexture;
+    std::vector<sf::VertexArray> vertexArrays;
     std::vector<TexturePack::Texture *> spriteDatas;
     std::vector<rectpack2D::rect_xywh> rectangles;
 

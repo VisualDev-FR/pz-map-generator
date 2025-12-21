@@ -1,7 +1,11 @@
 #include "cell_viewer.h"
 
 #include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/PrimitiveType.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Vertex.hpp>
+#include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/System/Time.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <cstdint>
 #include <stdexcept>
@@ -129,10 +133,16 @@ sf::Image CellViewer::loadTexture(TexturePack::Page *page)
 
 void CellViewer::preComputeSprites()
 {
-    renderTiles.clear();
-
     const float TILE_WIDTH = 128.0f;
     const float TILE_HEIGHT = 64.0f;
+
+    vertexArrays.clear();
+    vertexArrays.resize(lotheader.maxLayer - lotheader.minLayer);
+
+    for (int i = 0; i < vertexArrays.size(); i++)
+    {
+        vertexArrays[i] = sf::VertexArray(sf::PrimitiveType::Triangles);
+    }
 
     for (auto &square : lotpack.squareMap)
     {
@@ -156,14 +166,45 @@ void CellViewer::preComputeSprites()
             sf::Sprite sprite(atlasTexture);
             rectpack2D::rect_xywh &rectangle = rectangles[spriteId];
 
-            sf::Vector2i posInSheet = { rectangle.x, rectangle.y };
-            sf::Vector2i texSize = { rectangle.w, rectangle.h };
+            float x = screenX + textureData->ox;
+            float y = screenY + textureData->oy;
+            float w = static_cast<float>(rectangle.w);
+            float h = static_cast<float>(rectangle.h);
 
-            sprite.setTextureRect(sf::IntRect(posInSheet, texSize));
-            sprite.setOrigin({ 0, 0 });
-            sprite.setPosition({ screenX + textureData->ox, screenY + textureData->oy });
+            float tx = static_cast<float>(rectangle.x);
+            float ty = static_cast<float>(rectangle.y);
+            float tw = static_cast<float>(rectangle.w);
+            float th = static_cast<float>(rectangle.h);
 
-            renderTiles.push_back({ square.coord.z(), sprite });
+            sf::Vertex v0 = {
+                .position = { x, y },
+                .texCoords = { tx, ty },
+            };
+
+            sf::Vertex v1 = {
+                .position = { x, y + h },
+                .texCoords = { tx, ty + th },
+            };
+
+            sf::Vertex v2 = {
+                .position = { x + w, y },
+                .texCoords = { tx + tw, ty },
+            };
+
+            sf::Vertex v3 = {
+                .position = { x + w, y + h },
+                .texCoords = { tx + tw, ty + th },
+            };
+
+            // Triangle 1
+            vertexArrays[gz].append(v0);
+            vertexArrays[gz].append(v2);
+            vertexArrays[gz].append(v1);
+
+            // Triangle 2
+            vertexArrays[gz].append(v1);
+            vertexArrays[gz].append(v2);
+            vertexArrays[gz].append(v3);
         }
     }
 }
@@ -214,11 +255,11 @@ void CellViewer::handleEvents(const sf::Event &event, sf::RenderWindow &window)
     {
         if (keyPressed->code == sf::Keyboard::Key::Up)
         {
-            viewState.currentLayer = Math::fastMin(viewState.currentLayer + 1, lotheader.maxLayer + 1);
+            viewState.currentLayer = Math::fastMin(viewState.currentLayer + 1, lotheader.maxLayer - 1);
         }
         else if (keyPressed->code == sf::Keyboard::Key::Down)
         {
-            viewState.currentLayer = Math::fastMax(viewState.currentLayer - 1, lotheader.minLayer + 1);
+            viewState.currentLayer = Math::fastMax(viewState.currentLayer - 1, lotheader.minLayer);
         }
     }
 }
@@ -232,17 +273,23 @@ void CellViewer::update(sf::RenderWindow &window)
 
     Timer timer = Timer::start();
 
-    for (auto &renderTile : renderTiles)
+    for (int layer = 0; layer < (lotheader.maxLayer - lotheader.minLayer); layer++)
     {
-        if (renderTile.layer <= viewState.currentLayer)
+        if (layer <= viewState.currentLayer)
         {
-            window.draw(renderTile.sprite);
+            window.draw(vertexArrays[layer], &atlasTexture);
             drawCalls++;
         }
     }
 
-    viewState.firstFrame = false;
+    if (viewState.clock.getElapsedTime() > sf::milliseconds(750))
+    {
+        debugPanel.setFPS(1000 / timer.elapsedMiliseconds());
+        debugPanel.setTimer(timer.elapsedMiliseconds());
+        debugPanel.setDrawCalls(drawCalls);
 
-    debugPanel.setFPS(1000 / timer.elapsedMiliseconds());
-    debugPanel.setDrawCalls(drawCalls);
+        viewState.clock.restart();
+    }
+
+    viewState.firstFrame = false;
 }

@@ -7,16 +7,22 @@ DebugPanel::DebugPanel(tgui::Gui &gui)
     panel = tgui::Panel::create();
     panel->getRenderer()->setBackgroundColor(Colors::backgroundColor.tgui());
     panel->getRenderer()->setPadding(tgui::Padding(5));
-    panel->setSize({ 200, 50 });
+    panel->setSize({ 200, 80 });
 
     fpsLabel = tgui::Label::create();
     fpsLabel->getRenderer()->setTextColor(Colors::fontColor.tgui());
+    fpsLabel->setPosition({ 0, 0 });
 
     drawCallsLabel = tgui::Label::create();
     drawCallsLabel->getRenderer()->setTextColor(Colors::fontColor.tgui());
     drawCallsLabel->setPosition({ 0, 20 });
 
+    timerLabel = tgui::Label::create();
+    timerLabel->getRenderer()->setTextColor(Colors::fontColor.tgui());
+    timerLabel->setPosition({ 0, 40 });
+
     panel->add(fpsLabel);
+    panel->add(timerLabel);
     panel->add(drawCallsLabel);
 
     gui.add(panel);
@@ -25,6 +31,11 @@ DebugPanel::DebugPanel(tgui::Gui &gui)
 void DebugPanel::setFPS(float value)
 {
     fpsLabel->setText(fmt::format("{:.0f} fps", value));
+}
+
+void DebugPanel::setTimer(float value)
+{
+    timerLabel->setText(fmt::format("{:.3f} ms/frame", value));
 }
 
 void DebugPanel::setDrawCalls(int value)

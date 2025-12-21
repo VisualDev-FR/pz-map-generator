@@ -4,6 +4,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/View.hpp>
+#include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <iostream>
 #include <string>
@@ -34,7 +35,7 @@ void main_window()
     MapFilesService mapFileService(constants::GAME_PATH, MapNames::Muldraugh);
 
     // TilesBrowser tilesBrowser(gui, window, tilesheetService);
-    CellViewer cellViewer(&view, &mapFileService, &tilesheetService, gui, 32, 45);
+    CellViewer cellViewer(&view, &mapFileService, &tilesheetService, gui, 31, 45);
 
     while (window.isOpen())
     {
